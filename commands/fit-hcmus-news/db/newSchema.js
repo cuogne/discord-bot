@@ -15,6 +15,7 @@ const userConfigSchema = new mongoose.Schema({
 
 const sentNewsSchema = new mongoose.Schema({
   category: { type: String, required: true, unique: true },
+  arrSentUrls: { type: [String], default: [] },
   title: { type: String, required: true },
   url: { type: String, required: true },
   sentAt: { type: Date, default: Date.now }

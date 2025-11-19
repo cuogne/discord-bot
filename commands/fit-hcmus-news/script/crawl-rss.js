@@ -23,28 +23,36 @@ export async function crawlRssNews(link, category) {
             throw new Error(`Invalid RSS structure: missing or empty items for ${category}`);
         }
 
-        const latestItem = channel.item[0];
-        if (!latestItem || !latestItem.title || !Array.isArray(latestItem.title) || latestItem.title.length === 0) {
-            throw new Error(`Invalid RSS structure: missing title for ${category}`);
+        const items = channel.item.slice(0, 10);
+        const newsList = [];
+
+        for (const item of items) {
+            if (!item || !item.title || !Array.isArray(item.title) || item.title.length === 0) {
+                continue;
+            }
+            if (!item.link || !Array.isArray(item.link) || item.link.length === 0) {
+                continue;
+            }
+
+            const title = item.title[0];
+            const url = item.link[0];
+
+            if (!title || !url) {
+                continue;
+            }
+
+            newsList.push({
+                category,
+                title,
+                url,
+            });
         }
-        if (!latestItem.link || !Array.isArray(latestItem.link) || latestItem.link.length === 0) {
-            throw new Error(`Invalid RSS structure: missing link for ${category}`);
+
+        if (newsList.length === 0) {
+            throw new Error(`No valid news items found for ${category}`);
         }
 
-        const title = latestItem.title[0];
-        const url = latestItem.link[0];
-
-        if (!title || !url) {
-            throw new Error(`Invalid RSS data: empty title or url for ${category}`);
-        }
-
-        const newsData = {
-            category,
-            title,
-            url,
-        };
-
-        return newsData;
+        return newsList;
     } catch (error) {
         console.error('Error fetching latest news:', error);
         throw error;

@@ -12,13 +12,15 @@ export async function latestSubCommand(interaction) {
         const type = feed.type
         const url = feed ? feed.url : null;
 
-        if  (type == 'rss') {
-            const newsData = await crawlRssNews(url, categoryOption);
+        if (type == 'rss') {
+            const rssNewsArr = await crawlRssNews(url, categoryOption);
+            const rssNewsData = Array.isArray(rssNewsArr) ? rssNewsArr[0] : rssNewsArr;
             await interaction.editReply(
-                `📰 | **${newsData.title}**\n\n${newsData.url}`
+                `📰 | **${rssNewsData.title}**\n\n${rssNewsData.url}`
             );
         } else if (type == 'html') {
-            const htmlNewsData = await crawlHTMLNews(url, categoryOption);
+            const htmlNewsArr = await crawlHTMLNews(url, categoryOption);
+            const htmlNewsData = Array.isArray(htmlNewsArr) ? htmlNewsArr[0] : htmlNewsArr;
             await interaction.editReply(
                 `📰 | **${htmlNewsData.title}**\n\n${htmlNewsData.url}`
             );

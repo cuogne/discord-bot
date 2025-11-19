@@ -8,38 +8,36 @@ export async function crawlHTMLNews(link, category) {
         const $ = cheerio.load(html);
 
         // class "content entry" -> article -> title links
-        // $('.content.entry .cmsmasters_archive_item_title.entry-title a').each((index, element) => {
-        //     const title = $(element).text().trim();
-        //     const url = $(element).attr('href');
+        const elements = $('.content.entry .cmsmasters_archive_item_title.entry-title a');
 
-        //     articles.push({ 
-        //         title,
-        //         url
-        //     });
-        // });
-
-        const element = $('.content.entry .cmsmasters_archive_item_title.entry-title a').first();
-
-        if (!element || element.length === 0) {
+        if (!elements || elements.length === 0) {
             throw new Error(`No news element found for ${category}`);
         }
 
-        const title = element.text().trim();
-        const url = element.attr('href');
+        const newsList = [];
+        const sizeNews = Math.min(elements.length, 10);
 
-        if (!title || !url) {
-            throw new Error(`Invalid HTML data: empty title or url for ${category}`);
+        for (let i = 0; i < sizeNews; i++) {
+            const element = $(elements[i]);
+            const title = element.text().trim();
+            const url = element.attr('href');
+
+            if (!title || !url) {
+                continue;
+            }
+
+            newsList.push({
+                category,
+                title,
+                url,
+            });
         }
 
-        const newsData = {
-            category,
-            title,
-            url,
-        };
+        if (newsList.length === 0) {
+            throw new Error(`No valid news items found for ${category}`);
+        }
 
-        return newsData;
-
-        // fs.writeFileSync('hcmus-articles.json', JSON.stringify(articles, null, 2));
+        return newsList;
 
     } catch (error) {
         console.error('❌ Error:', error.message);

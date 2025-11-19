@@ -34,31 +34,72 @@ export async function sendNews(client) {
             const configs = await schema.find({ isActive: true }).lean();
             if (!configs.length) return;
 
+            // group news by category
+            const newsByCategory = {};
+            for (const news of listNews) {
+                if (!newsByCategory[news.category]) {
+                    newsByCategory[news.category] = [];
+                }
+                newsByCategory[news.category].push(news);
+            }
+
+            const categories = Object.keys(newsByCategory); // get category ['fithcmus', 'lichthi', 'thongbao', 'hcmus']
+            const sentNewsRecords = await SentNews.find({ category: { $in: categories } }).lean();
+
+            // group sent news by category
+            const arrSentUrlsMap = {};
+            for (const record of sentNewsRecords) {
+                arrSentUrlsMap[record.category] = new Set(
+                    record.arrSentUrls && record.arrSentUrls.length > 0 ? record.arrSentUrls : (record.url ? [record.url] : [])
+                );
+            }
+
+            // send news to each config server of user
             for (const cfg of configs) {
-                const guild = client.guilds.cache.get(cfg.guildId);
-                const channel = guild?.channels.cache.get(cfg.channelId);
+                const guild = client.guilds.cache.get(cfg.guildId);         // get guild by guildId
+                const channel = guild?.channels.cache.get(cfg.channelId);   // get channel by channelId
                 if (!channel) continue;
 
-                const filteredNews = cfg.categories?.length
-                    ? listNews.filter((n) => cfg.categories.includes(n.category))
-                    : listNews;
+                // filter news by category of config
+                const filteredNews = cfg.categories?.length ? listNews.filter((n) => cfg.categories.includes(n.category)) : listNews;
 
-                for (const news of filteredNews) {
+                const configArrSentUrlsMap = {};
+                for (const category in arrSentUrlsMap) {
+                    // copy set
+                    configArrSentUrlsMap[category] = new Set(arrSentUrlsMap[category]);
+                }
+
+                const newNews = filteredNews.filter(news => {
+                    const arrSentUrls = configArrSentUrlsMap[news.category];
+                    if (!arrSentUrls) {
+                        configArrSentUrlsMap[news.category] = new Set();
+                        return true; // old news (exist in db -> not send)
+                    }
+                    return !arrSentUrls.has(news.url); // new news (not exist in db -> send)
+                });
+
+                for (const news of newNews) {
                     try {
-                        const last = await SentNews.findOne({ category: news.category });
-
-                        if (last && last.url === news.url) continue;
-
-                        // gửi tin
                         await channel.send(
                             `📰 | **${news.title}**\n\n${news.url}`
                         );
 
+                        const arrSentUrls = configArrSentUrlsMap[news.category] || new Set();
+                        arrSentUrls.add(news.url);
+                        configArrSentUrlsMap[news.category] = arrSentUrls;
+
+                        if (!arrSentUrlsMap[news.category]) {
+                            arrSentUrlsMap[news.category] = new Set();
+                        }
+                        arrSentUrlsMap[news.category].add(news.url);
+
+                        // update db
                         await SentNews.findOneAndUpdate(
                             { category: news.category },
-                            { 
-                                title: news.title, 
+                            {
+                                title: news.title,
                                 url: news.url,
+                                arrSentUrls: Array.from(arrSentUrlsMap[news.category]),
                                 sentAt: new Date()
                             },
                             { upsert: true, new: true }

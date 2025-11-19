@@ -18,17 +18,22 @@ export async function getListNews() {
         const results = await Promise.allSettled(promises);
 
         const newsList = results
-            .map((result, index) => {
+            .flatMap((result, index) => {
                 if (result.status === 'fulfilled' && result.value) {
-                    return result.value;
+                    if (Array.isArray(result.value)) {
+                        return result.value;
+                    } else if (result.value !== null) {
+                        return [result.value];
+                    }
+                    return [];
                 } else if (result.status === 'rejected') {
                     const feed = feedLinks[index];
                     console.error(`Error fetching news from ${feed.name} (${feed.category}):`, result.reason?.message || result.reason);
-                    return null;
+                    return [];
                 }
-                return null;
+                return [];
             })
-            .filter(news => news !== null)
+            .filter(news => news !== null && news !== undefined);
 
         return newsList;
 
