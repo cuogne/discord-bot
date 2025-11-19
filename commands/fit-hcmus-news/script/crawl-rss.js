@@ -14,9 +14,29 @@ export async function crawlRssNews(link, category) {
         const text = await response.text();
         const result = await parseStringPromise(text);
 
-        const latestItem = result.rss.channel[0].item[0];
+        if (!result || !result.rss || !result.rss.channel || !Array.isArray(result.rss.channel) || result.rss.channel.length === 0) {
+            throw new Error(`Invalid RSS structure: missing or empty channel for ${category}`);
+        }
+
+        const channel = result.rss.channel[0];
+        if (!channel.item || !Array.isArray(channel.item) || channel.item.length === 0) {
+            throw new Error(`Invalid RSS structure: missing or empty items for ${category}`);
+        }
+
+        const latestItem = channel.item[0];
+        if (!latestItem || !latestItem.title || !Array.isArray(latestItem.title) || latestItem.title.length === 0) {
+            throw new Error(`Invalid RSS structure: missing title for ${category}`);
+        }
+        if (!latestItem.link || !Array.isArray(latestItem.link) || latestItem.link.length === 0) {
+            throw new Error(`Invalid RSS structure: missing link for ${category}`);
+        }
+
         const title = latestItem.title[0];
         const url = latestItem.link[0];
+
+        if (!title || !url) {
+            throw new Error(`Invalid RSS data: empty title or url for ${category}`);
+        }
 
         const newsData = {
             category,
