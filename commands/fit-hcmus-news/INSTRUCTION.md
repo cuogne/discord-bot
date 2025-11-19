@@ -30,7 +30,7 @@
 
 <img src="./demo/create_account_discord.png" alt="Create Discord account" height="300" />
 
-4. Thêm bot vào server của bạn bằng cách ấn vào link sau: [Discord Bot](https://discord.com/oauth2/authorize?client_id=1395723998821879849) 
+4. Thêm bot vào server của bạn bằng cách ấn vào link sau: [Discord Bot](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands) 
 
 - Chọn `Add to Server`
 

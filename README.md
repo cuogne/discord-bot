@@ -2,7 +2,7 @@
 
 Một con bot discord sieu cap ngu xi dan don duoc viet bang javascript.
 
-Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/authorize?client_id=1395723998821879849)
+Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands)
 
 ## Commands
 

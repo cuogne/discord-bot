@@ -7,6 +7,18 @@ export async function setupChannelSubCommand(interaction) {
     const selectedChannel = interaction.options.getChannel('channel');  // lay kenh tu option
     const targetChannel = selectedChannel || interaction.channel;       // lay kenh hien tai
 
+    if (!interaction.guild) {
+        await interaction.editReply({
+            embeds: [{
+                title: "Lỗi",
+                description: "Lệnh này chỉ có thể sử dụng trong server. Bạn hãy mời bot vào server của bạn để dùng nhé!",
+                color: 0xff0000
+            }],
+            ephemeral: true
+        });
+        return;
+    }
+
     if (!interaction.memberPermissions.has(PermissionsBitField.Flags.ManageChannels)) {
         await interaction.editReply({
             embeds: [{
