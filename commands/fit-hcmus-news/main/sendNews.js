@@ -17,10 +17,11 @@ export async function sendNews(client) {
             const MAX_URLS = 10;
 
             sentRecords.forEach(record => {
-                sentUrlsMap[record.category] = record.arrSentUrls || [];
+                const urls = new Set(record.arrSentUrls || []);
                 if (record.url) {
-                    sentUrlsMap[record.category].push(record.url);
+                    urls.add(record.url);
                 }
+                sentUrlsMap[record.category] = Array.from(urls);
             });
 
             // array filter new news -> newNews array is only contain new news
@@ -41,25 +42,7 @@ export async function sendNews(client) {
 
             if (newNews.length === 0) return; // if no new news, return
 
-            const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
-
-            for (const cate of categoriesToUpdate) {
-                const updatedUrls = sentUrlsMap[cate].slice(-MAX_URLS);
-
-                const latestNews = newNews.filter(n => n.category === cate).pop();
-
-                // update db
-                await SentNews.findOneAndUpdate(
-                    { category: cate },
-                    {
-                        title: latestNews.title,
-                        url: latestNews.url,
-                        arrSentUrls: updatedUrls,
-                        sentAt: new Date()
-                    },
-                    { upsert: true, new: true }
-                );
-            }
+            newNews.reverse();
 
             // send news to users
             const configs = await schema.find({ isActive: true }).lean(); // get config of servers
@@ -89,6 +72,27 @@ export async function sendNews(client) {
                         console.error(`Failed to send to guild ${cfg.guildId}:`, err);
                     }
                 }
+            }
+
+            // update db after sending news
+            const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
+
+            for (const cate of categoriesToUpdate) {
+                const updatedUrls = sentUrlsMap[cate].slice(-MAX_URLS);
+
+                const latestNews = newNews.filter(n => n.category === cate).pop();
+
+                // update db
+                await SentNews.findOneAndUpdate(
+                    { category: cate },
+                    {
+                        title: latestNews.title,
+                        url: latestNews.url,
+                        arrSentUrls: updatedUrls,
+                        sentAt: new Date()
+                    },
+                    { upsert: true, new: true }
+                );
             }
 
         } catch (error) {
