@@ -44,7 +44,3 @@ export async function crawlHTMLNews(link, category) {
         throw error;
     }
 }
-
-const data = await crawlHTMLNews('https://hcmus.edu.vn/category/dao-tao/dai-hoc/thong-tin-danh-cho-sinh-vien', 'hcmus');
-console.log(data);
-
