@@ -37,11 +37,14 @@ export async function crawlHTMLNews(link, category) {
             throw new Error(`No valid news items found for ${category}`);
         }
 
-        return newsList;
+        return newsList.reverse();
 
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        console.error('Error:', error.message);
         throw error;
     }
 }
+
+const data = await crawlHTMLNews('https://hcmus.edu.vn/category/dao-tao/dai-hoc/thong-tin-danh-cho-sinh-vien', 'hcmus');
+console.log(data);
 

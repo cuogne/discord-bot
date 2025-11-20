@@ -37,11 +37,11 @@ export async function sendNews(client) {
                 if (!sentUrlsMap[news.category].includes(news.url)) {
                     newNews.push(news);
 
-                    // add newest news to the beginning of list
-                    sentUrlsMap[news.category] = [news.url, ...sentUrlsMap[news.category]];
+                    // add newest news to the end of list
+                    sentUrlsMap[news.category] = [...sentUrlsMap[news.category], news.url];
 
                     if (sentUrlsMap[news.category].length > MAX_URLS) { // 10
-                        sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(0, MAX_URLS);
+                        sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(-MAX_URLS);
                     }
                 }
             }
@@ -82,11 +82,9 @@ export async function sendNews(client) {
             const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
 
             for (const cate of categoriesToUpdate) {
-                const updatedUrls = sentUrlsMap[cate].slice(0, MAX_URLS);
-                const latestUrl = updatedUrls[0];
-                const latestNews =
-                    newNews.find(n => n.category === cate && n.url === latestUrl) ||
-                    newNews.find(n => n.category === cate);
+                const updatedUrls = sentUrlsMap[cate].slice(-MAX_URLS);
+                const latestUrl = updatedUrls[updatedUrls.length - 1];
+                const latestNews = newNews.find(n => n.category === cate && n.url === latestUrl);
 
                 // update db
                 await SentNews.findOneAndUpdate(

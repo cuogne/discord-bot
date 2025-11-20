@@ -52,7 +52,7 @@ export async function crawlRssNews(link, category) {
             throw new Error(`No valid news items found for ${category}`);
         }
 
-        return newsList;
+        return newsList.reverse();
     } catch (error) {
         console.error('Error fetching latest news:', error);
         throw error;
