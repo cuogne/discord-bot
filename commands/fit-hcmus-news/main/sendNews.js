@@ -11,12 +11,12 @@ export async function sendNews(client) {
 
             // get list news sent to channel from db
             // format: { category: [url1, url2, ...], category: [url1, url2, ...], ... }
-            const sentRecords = await SentNews.find({ category: { $in: categories } }).lean();
+            const getSentNewsFromDB = await SentNews.find({ category: { $in: categories } }).lean();
 
             const sentUrlsMap = {}; // this is a map of categories and their sent urls
             const MAX_URLS = 10;
 
-            sentRecords.forEach(record => {
+            getSentNewsFromDB.forEach(record => {
                 const urls = new Set(record.arrSentUrls || []);
                 if (record.url) {
                     urls.add(record.url);
@@ -36,13 +36,17 @@ export async function sendNews(client) {
                 // if url is not in the set, it is a new news
                 if (!sentUrlsMap[news.category].includes(news.url)) {
                     newNews.push(news);
-                    sentUrlsMap[news.category].push(news.url);
+
+                    // add newest news to the beginning of list
+                    sentUrlsMap[news.category] = [news.url, ...sentUrlsMap[news.category]];
+
+                    if (sentUrlsMap[news.category].length > MAX_URLS) { // 10
+                        sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(0, MAX_URLS);
+                    }
                 }
             }
 
             if (newNews.length === 0) return; // if no new news, return
-
-            newNews.reverse();
 
             // send news to users
             const configs = await schema.find({ isActive: true }).lean(); // get config of servers
@@ -78,17 +82,18 @@ export async function sendNews(client) {
             const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
 
             for (const cate of categoriesToUpdate) {
-                const reversedUrls = [...sentUrlsMap[cate]].reverse();
-                const updatedUrls = reversedUrls.slice(-MAX_URLS);
-
-                const latestNews = newNews.filter(n => n.category === cate).pop();
+                const updatedUrls = sentUrlsMap[cate].slice(0, MAX_URLS);
+                const latestUrl = updatedUrls[0];
+                const latestNews =
+                    newNews.find(n => n.category === cate && n.url === latestUrl) ||
+                    newNews.find(n => n.category === cate);
 
                 // update db
                 await SentNews.findOneAndUpdate(
                     { category: cate },
                     {
-                        title: latestNews.title,
-                        url: latestNews.url,
+                        title: latestNews?.title ?? "",
+                        url: latestUrl,
                         arrSentUrls: updatedUrls,
                         sentAt: new Date()
                     },
