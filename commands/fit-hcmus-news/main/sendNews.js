@@ -78,7 +78,8 @@ export async function sendNews(client) {
             const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
 
             for (const cate of categoriesToUpdate) {
-                const updatedUrls = sentUrlsMap[cate].slice(-MAX_URLS);
+                const reversedUrls = [...sentUrlsMap[cate]].reverse();
+                const updatedUrls = reversedUrls.slice(-MAX_URLS);
 
                 const latestNews = newNews.filter(n => n.category === cate).pop();
 
