@@ -14,13 +14,13 @@ export async function latestSubCommand(interaction) {
 
         if (type == 'rss') {
             const rssNewsArr = await crawlRssNews(url, categoryOption);
-            const rssNewsData = Array.isArray(rssNewsArr) ? rssNewsArr[0] : rssNewsArr;
+            const rssNewsData = Array.isArray(rssNewsArr) ? rssNewsArr[rssNewsArr.length - 1] : rssNewsArr;
             await interaction.editReply(
                 `📰 | **${rssNewsData.title}**\n\n${rssNewsData.url}`
             );
         } else if (type == 'html') {
             const htmlNewsArr = await crawlHTMLNews(url, categoryOption);
-            const htmlNewsData = Array.isArray(htmlNewsArr) ? htmlNewsArr[0] : htmlNewsArr;
+            const htmlNewsData = Array.isArray(htmlNewsArr) ? htmlNewsArr[htmlNewsArr.length - 1] : htmlNewsArr;
             await interaction.editReply(
                 `📰 | **${htmlNewsData.title}**\n\n${htmlNewsData.url}`
             );
