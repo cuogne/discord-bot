@@ -136,7 +136,7 @@ export const commands = [
                         .setDescription('Chọn giải đấu bóng đá bạn muốn xem lịch thi đấu')
                         .setRequired(true)
                         .addChoices(
-                            { name: '🇬🇧 Primere League', value: 'eng.1' },
+                            { name: '🇬🇧 Premier League', value: 'eng.1' },
                             { name: '🇪🇸 La Liga', value: 'esp.1' },
                             { name: '🇩🇪 Bundesliga', value: 'ger.1' },
                             { name: '🇮🇹 Serie A', value: 'ita.1' },
