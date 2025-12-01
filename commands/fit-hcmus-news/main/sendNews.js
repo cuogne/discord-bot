@@ -40,9 +40,9 @@ export async function sendNews(client) {
                     // add newest news to the end of list
                     sentUrlsMap[news.category] = [...sentUrlsMap[news.category], news.url];
 
-                    if (sentUrlsMap[news.category].length > MAX_URLS) { // 10
-                        sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(-MAX_URLS);
-                    }
+                    // if (sentUrlsMap[news.category].length > MAX_URLS) { // 10
+                    //     sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(-MAX_URLS);
+                    // }
                 }
             }
 
