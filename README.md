@@ -1,4 +1,4 @@
-# cừn-bot
+# discord-bot-của-cừn
 
 Một con bot discord sieu cap ngu xi dan don duoc viet bang javascript.
 
@@ -20,6 +20,7 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/football rank` | `<league> <season>` | Xem bảng xếp hạng bóng đá của các giải đấu Châu Âu theo mùa giải | `/football rank Premier League 2025` |
 | `/football score` | *(không có)* | Xem tỷ số bóng đá của các trận đấu đêm qua và rạng sáng nay | `/football score` |
 | `/football tournament` | `<tournament>` | Xem lịch thi đấu bóng đá của các giải đấu lớn (EPL, La Liga, ...) | `/football tournament Premier League` |
+| `/gemini` | `<prompt>` | Chat với AI Gemini | `/gemini Giải thích đoạn code sau: ...` |
 | `/help` | *(không có)* | Hiển thị danh sách các lệnh có sẵn và còn hoạt động | `/help` |
 | `/image` | `<dog \| cat>` | Gửi hình ảnh ngẫu nhiên về chó hoặc mèo | `/image dog` |
 | `/omikuji` | *(không có)* | Xem quẻ bói omikuji Nhật Bản | `/omikuji` |

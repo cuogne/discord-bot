@@ -14,6 +14,7 @@ export async function helpCommand(interaction) {
         '/football rank `[league]` `[season]`': 'Xem bảng xếp hạng của các giải đấu châu Âu',
         '/football score': 'Xem tỉ số của các trận đấu bóng đá đêm qua và rạng sáng nay',
         '/football tournament `[tournament]`': 'Xem lịch thi đấu bóng đá của các giải đấu châu Âu',
+        '/gemini `[prompt]`': 'Chat với Google Gemini AI',
         '/help': 'Hiển thị các thông tin cơ bản về bot cũng như command',
         '/image `[dog | cat]`': 'Gửi hình ảnh ngẫu nhiên về chó hoặc mèo',
         '/omikuji': 'Xem quẻ bói omikuji Nhật Bản',

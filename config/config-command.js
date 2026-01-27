@@ -16,16 +16,17 @@ import { groqCommand } from "../commands/groqAI/groqCommand.js";
 import { footballCommand } from "../commands/football/footballCommand.js";
 import { pokemonCommand } from "../commands/pokemon/pokemonCommand.js";
 import { omikujiCommand } from "../commands/omikuji/omikujiCommand.js";
+import { geminiCommand } from "../commands/gemini/geminiCommand.js";
 
 // handle selection
 import { handleMovieTodaySelection } from "../commands/cinestar/handler/handleMovieTodaySelection.js";
 import { handleUpcomingMovieSelection } from "../commands/cinestar/handler/handleUpcomingMovieSelection.js";
 import { handleSelectionMovieCGV } from "../commands/cgv/handleSelectionMovieCGV.js";
 
- /* Syntax for adding command
-    new SlashCommandBuilder()
-        .setName('command_name')
-        .setDescription('command_description')
+/* Syntax for adding command
+   new SlashCommandBuilder()
+       .setName('command_name')
+       .setDescription('command_description')
 */
 export const commands = [
     new SlashCommandBuilder()
@@ -86,7 +87,7 @@ export const commands = [
                         )
                 )
         )
-        .addSubcommand(subcommand => 
+        .addSubcommand(subcommand =>
             subcommand
                 .setName('upcoming')
                 .setDescription('Hiển thị danh sách các phim sắp chiếu tại Cinestar')
@@ -173,8 +174,8 @@ export const commands = [
                             { name: 'AS Roma', value: '104' },
                             { name: 'Napoli', value: '114' },
                             { name: 'Juventus', value: '111' }
+                        )
                 )
-            )
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -187,7 +188,7 @@ export const commands = [
                 .setDescription('Xem bảng xếp hạng bóng đá của các giải đấu Châu Âu theo mùa giải')
                 .addStringOption(option =>
                     option.setName('league')
-                        .setDescription('Chọn giải đấu bạn muốn xem bảng xếp hạng') 
+                        .setDescription('Chọn giải đấu bạn muốn xem bảng xếp hạng')
                         .setRequired(true)
                         .addChoices(
                             { name: '🇬🇧 Premier League', value: 'eng.1' },
@@ -242,7 +243,7 @@ export const commands = [
             subcommand
                 .setName('latest')
                 .setDescription('Lấy tin gần nhất')
-                .addStringOption(option => 
+                .addStringOption(option =>
                     option.setName('category')
                         .setDescription('Chọn danh mục tin tức bạn muốn lấy')
                         .setRequired(true)
@@ -312,10 +313,19 @@ export const commands = [
                 .setDescription('Nhập ID Pokémon bạn muốn tìm (giá trị trong khoảng 1-1025 hoặc 10001-10277)')
                 .setRequired(false)
         ),
-    
+
     new SlashCommandBuilder()
         .setName('omikuji')
-        .setDescription('Xem quẻ bói omikuji Nhật Bản')
+        .setDescription('Xem quẻ bói omikuji Nhật Bản'),
+
+    new SlashCommandBuilder()
+        .setName('gemini')
+        .setDescription('Chat với AI Gemini (Google)')
+        .addStringOption(option =>
+            option.setName('prompt')
+                .setDescription('Nhập câu hỏi hoặc yêu cầu của bạn')
+                .setRequired(true)
+        ),
 ];
 
 // syntax: { command_name: command_function }
@@ -335,6 +345,7 @@ export const commandHandlers = {
     football: footballCommand,
     pokemon: pokemonCommand,
     omikuji: omikujiCommand,
+    gemini: geminiCommand,
 };
 
 // export handle selection
