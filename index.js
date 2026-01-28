@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, Events } from 'discord.js';
 import 'dotenv/config';
 
 import { initializeREST, registerCommands } from './handlers/initHandler.js';
@@ -16,7 +16,7 @@ const client = new Client({
 
 const rest = initializeREST(process.env.BOT_TOKEN);
 
-client.once('ready', async () => {
+client.once(Events.ClientReady, async () => {
     console.log(`Tên bot: ${client.user.tag}!`);
     await registerCommands(client, rest);
     await connectDBAndMonitorNews(client);
