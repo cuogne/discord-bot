@@ -8,6 +8,8 @@ RUN bun install --frozen-lockfile --production
 
 COPY . .
 
+RUN chown -R bun:bun /usr/src/app
+
 USER bun
 
 CMD [ "bun", "run", "index.js" ]
