@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 
 export async function crawlHTMLNews(link, category) {
     try {
-        const response = await axios.get(link);
+        const response = await axios.get(link, { timeout: 15000 });
         const html = response.data;
         const $ = cheerio.load(html);
 

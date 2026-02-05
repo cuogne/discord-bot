@@ -2,7 +2,7 @@ import { schema, SentNews } from "../db/newSchema.js";
 import { getListNews } from "./getListNews.js";
 
 export async function sendNews(client) {
-    setInterval(async () => {
+    const run = async () => {
         try {
             const listNewsFromPages = await getListNews(); // get list news from all feeds
             if (!Array.isArray(listNewsFromPages) || listNewsFromPages.length === 0) return;
@@ -101,6 +101,10 @@ export async function sendNews(client) {
 
         } catch (error) {
             console.error("sendNews error:", error);
+        } finally {
+            setTimeout(run, 1000 * 60 * 10);
         }
-    }, 1000 * 60 * 10);
+    };
+
+    run();
 }
