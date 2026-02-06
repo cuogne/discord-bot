@@ -1,15 +1,15 @@
-FROM oven/bun:1-alpine
+FROM node:lts-alpine
 
 WORKDIR /usr/src/app
 
-COPY package.json bun.lock ./
+COPY package.json yarn.lock ./
 
-RUN bun install --frozen-lockfile --production
+RUN yarn install --frozen-lockfile --production
 
 COPY . .
 
-RUN chown -R bun:bun /usr/src/app
+RUN chown -R node:node /usr/src/app
 
-USER bun
+USER node
 
-CMD [ "bun", "run", "index.js" ]
+CMD [ "node", "index.js" ]

@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "bun index.js",
-    "dev": "bun --watch index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "cừn",
   "license": "ISC",
-  "description": "a discord bot built with Bun, many useful features",
+  "description": "a discord bot built with yarn, many useful features",
   "dependencies": {
     "@google/genai": "^1.38.0",
     "@nghiavuive/lunar_date_vi": "^2.0.1",
@@ -19,6 +19,7 @@
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
     "mongoose": "^9.1.5",
+    "nodemon": "^3.1.11",
     "openai": "^6.16.0",
     "xml2js": "^0.6.2"
   }
