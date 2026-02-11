@@ -1,6 +1,9 @@
 import { schema, SentNews } from "../db/newSchema.js";
 import { getListNews } from "./getListNews.js";
 
+const MAX_URLS = 20;                // upgrade 10 -> 20
+const SCAN_TIME = 1000 * 60 * 10    // scan news 10 minutes
+
 export async function sendNews(client) {
     const run = async () => {
         try {
@@ -14,7 +17,6 @@ export async function sendNews(client) {
             const getSentNewsFromDB = await SentNews.find({ category: { $in: categories } }).lean();
 
             const sentUrlsMap = {}; // this is a map of categories and their sent urls
-            const MAX_URLS = 10;
 
             getSentNewsFromDB.forEach(record => {
                 const urls = new Set(record.arrSentUrls || []);
@@ -52,12 +54,13 @@ export async function sendNews(client) {
             const configs = await schema.find({ isActive: true }).lean(); // get config of servers
             if (!configs.length) return;
 
-            for (const cfg of configs) {
+            // for (const cfg of configs) {
+            await Promise.all(configs.map(async (cfg) => {
                 const guild = client.guilds.cache.get(cfg.guildId);
-                if (!guild) continue;
+                if (!guild) return;
 
                 const channel = guild.channels.cache.get(cfg.channelId);
-                if (!channel) continue;
+                if (!channel) return;
 
                 const userNews = newNews.filter(n =>
                     !cfg.categories?.length || cfg.categories.includes(n.category)
@@ -76,7 +79,7 @@ export async function sendNews(client) {
                         console.error(`Failed to send to guild ${cfg.guildId}:`, err);
                     }
                 }
-            }
+            }));
 
             // update db after sending news
             const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
@@ -102,7 +105,7 @@ export async function sendNews(client) {
         } catch (error) {
             console.error("sendNews error:", error);
         } finally {
-            setTimeout(run, 1000 * 60 * 10);
+            setTimeout(run, SCAN_TIME);
         }
     };
 
