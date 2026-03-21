@@ -39,7 +39,12 @@ export async function giaxangCommand(interaction) {
     }
   }
 
-  // read file
+  // read file – guard against missing file (e.g. getData returned null)
+  if (!fs.existsSync(`${getPath()}/${filePath}`)) {
+    await interaction.editReply('Không có dữ liệu giá xăng cho ngày hôm nay.');
+    return;
+  }
+
   const data = JSON.parse(fs.readFileSync(`${getPath()}/${filePath}`, 'utf-8'));
 
   /*
