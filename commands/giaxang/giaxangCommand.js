@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { getToday } from './utils/getToday.js';
 import { getPath } from './utils/getPath.js';
 import { getData } from './utils/getData.js';
@@ -14,14 +15,15 @@ export async function giaxangCommand(interaction) {
 
   const today = getToday();
   const filePath = `${today}.json`;
-  const fileStore = fs.readdirSync(getPath())
+  const dir = getPath();
+  const fileStore = fs.readdirSync(dir)
 
   if (!fileStore.includes(filePath)) {
     // clear old files, fetch data, write file and send data
-    const files = fs.readdirSync(getPath());
+    const files = fs.readdirSync(dir);
     files.forEach(file => {
       if (file !== '.gitkeep' && !file.startsWith(today)) {
-        fs.unlinkSync(`${getPath()}/${file}`);
+        fs.unlinkSync(path.join(dir, file));
       }
     });
 
@@ -29,7 +31,7 @@ export async function giaxangCommand(interaction) {
       const data = await getData(today);
       if (data) {
         const dataToWrite = JSON.stringify(data, null, 2);
-        fs.writeFileSync(`${getPath()}/${filePath}`, dataToWrite, 'utf-8');
+        fs.writeFileSync(path.join(dir, filePath), dataToWrite, 'utf-8');
       }
     }
     catch (error) {
