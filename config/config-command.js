@@ -17,6 +17,7 @@ import { footballCommand } from "../commands/football/footballCommand.js";
 import { pokemonCommand } from "../commands/pokemon/pokemonCommand.js";
 import { omikujiCommand } from "../commands/omikuji/omikujiCommand.js";
 import { geminiCommand } from "../commands/gemini/geminiCommand.js";
+import { giaxangCommand } from "../commands/giaxang/giaxangCommand.js";
 
 // handle selection
 import { handleMovieTodaySelection } from "../commands/cinestar/handler/handleMovieTodaySelection.js";
@@ -326,6 +327,10 @@ export const commands = [
                 .setDescription('Nhập câu hỏi hoặc yêu cầu của bạn')
                 .setRequired(true)
         ),
+    
+    new SlashCommandBuilder()
+        .setName('giaxang')
+        .setDescription('Xem giá xăng dầu trong nước hôm nay')
 ];
 
 // syntax: { command_name: command_function }
@@ -346,6 +351,7 @@ export const commandHandlers = {
     pokemon: pokemonCommand,
     omikuji: omikujiCommand,
     gemini: geminiCommand,
+    giaxang: giaxangCommand,
 };
 
 // export handle selection
