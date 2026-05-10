@@ -1,5 +1,11 @@
-import { schema, SentNews } from "../db/newSchema.js";
+import { schema, newsSchema } from "../db/newSchema.js";
+import { getConfigServer } from "./getConfigServer.js";
+import { filterNews } from "./filterNews.js";
+import { getContentFromURL } from "./getContent.js";
+import { summarizeNewsWithGemini } from "./summarizeWithGemini.js";
 import { getListNews } from "./getListNews.js";
+import { saveToDB } from "./saveDB.js";
+import { EmbedBuilder } from "discord.js";
 
 const MAX_URLS = 20;                // upgrade 10 -> 20
 const SCAN_TIME = 1000 * 60 * 10    // scan news 10 minutes
@@ -8,51 +14,45 @@ export async function sendNews(client) {
     const run = async () => {
         try {
             const listNewsFromPages = await getListNews(); // get list news from all feeds
-            if (!Array.isArray(listNewsFromPages) || listNewsFromPages.length === 0) return;
+            if (!Array.isArray(listNewsFromPages) || listNewsFromPages.length === 0) {
+                return;
+            }
 
-            const categories = [...new Set(listNewsFromPages.map(n => n.category))];
+            // loc tin moi
+            const { newNews, sentUrlsMap } = await filterNews(listNewsFromPages, newsSchema)
+            if (newNews.length === 0) {
+                return;
+            }
 
-            // get list news sent to channel from db
-            // format: { category: [url1, url2, ...], category: [url1, url2, ...], ... }
-            const getSentNewsFromDB = await SentNews.find({ category: { $in: categories } }).lean();
-
-            const sentUrlsMap = {}; // this is a map of categories and their sent urls
-
-            getSentNewsFromDB.forEach(record => {
-                const urls = new Set(record.arrSentUrls || []);
-                if (record.url) {
-                    urls.add(record.url);
-                }
-                sentUrlsMap[record.category] = Array.from(urls);
-            });
-
-            // array filter new news -> newNews array is only contain new news
-            const newNews = [];
-
-            // loop through list news from pages
-            for (const news of listNewsFromPages) {
-                if (!sentUrlsMap[news.category]) {
-                    sentUrlsMap[news.category] = [];
-                }
-
-                // if url is not in the set, it is a new news
-                if (!sentUrlsMap[news.category].includes(news.url)) {
-                    newNews.push(news);
-
-                    // add newest news to the end of list
-                    sentUrlsMap[news.category] = [...sentUrlsMap[news.category], news.url];
-
-                    // if (sentUrlsMap[news.category].length > MAX_URLS) { // 10
-                    //     sentUrlsMap[news.category] = sentUrlsMap[news.category].slice(-MAX_URLS);
-                    // }
+            // summarize with ai - sequential to avoid rate limit
+            const SummaryResult = {} // title, url, summary
+            for (const news of newNews) {
+                try {
+                    const content = await getContentFromURL(news.url);
+                    if (!content) continue;
+                    
+                    const summary = await summarizeNewsWithGemini(content);
+                    
+                    SummaryResult[news.url] = {
+                        title: news.title,
+                        url: news.url,
+                        summary: summary,
+                        category: news.category
+                    };
+                    
+                    // Small delay to be safe
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (err) {
+                    console.error(`Failed to fetch summary for ${news.url}:`, err);
                 }
             }
 
-            if (newNews.length === 0) return; // if no new news, return
-
-            // send news to users
-            const configs = await schema.find({ isActive: true }).lean(); // get config of servers
-            if (!configs.length) return;
+            // get config of servers
+            const configs = await getConfigServer(schema)
+            if (!configs.length) {
+                console.log("No active server configurations found in database.");
+                return;
+            }
 
             // for (const cfg of configs) {
             await Promise.all(configs.map(async (cfg) => {
@@ -62,16 +62,29 @@ export async function sendNews(client) {
                 const channel = guild.channels.cache.get(cfg.channelId);
                 if (!channel) return;
 
-                const userNews = newNews.filter(n =>
-                    !cfg.categories?.length || cfg.categories.includes(n.category)
-                );
+                // const userNews = newNews.filter(n =>
+                //     !cfg.categories?.length || cfg.categories.includes(n.category)
+                // );
 
-                for (const news of userNews) {
+                for (const news of Object.values(SummaryResult)) {
                     try {
-
                         // send news to channel
+
+                        // format:
+                        /*
+                        📰 | Đăng ký tham quan NAB Vietnam ngày 21/5
+
+                        NAB Vietnam mở đơn đăng ký tham quan văn phòng tại The Hallmark và tham gia Workshop “Interview mastery” vào sáng 21/5/2026 dành riêng cho 50 sinh viên CNTT năm 3, 4.
+                        Chương trình giúp sinh viên trải nghiệm môi trường làm việc tại Top 4 ngân hàng Úc, rèn luyện kỹ năng phỏng vấn cùng chuyên gia quốc tế và được tích lũy điểm rèn luyện hoặc môn Kiến tập.
+                        Hạn chót đăng ký tại https://link.hcmus.edu.vn/Tour-NAB là 15g00 ngày 5/5/2026, lưu ý link sẽ đóng sớm khi đủ số lượng và có quy định xử lý nghiêm nếu sinh viên vắng mặt không phép.
+
+                        🔗Chi tiết xem tại: https://www.fit.hcmus.edu.vn/vn/Default.aspx?tabid=292&newsid=17375
+                        */
+
                         await channel.send(
-                            `📰 | **${news.title}**\n\n${news.url}`
+                            `📰 | **${news.title}**\n\n` +
+                            `${news.summary.trim()}\n\n` +
+                            `🔗 **Chi tiết xem tại: **${news.url}`
                         );
 
                         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -81,26 +94,8 @@ export async function sendNews(client) {
                 }
             }));
 
-            // update db after sending news
-            const categoriesToUpdate = [...new Set(newNews.map(n => n.category))];
-
-            for (const cate of categoriesToUpdate) {
-                const updatedUrls = sentUrlsMap[cate].slice(-MAX_URLS);
-                const latestUrl = updatedUrls[updatedUrls.length - 1];
-                const latestNews = newNews.find(n => n.category === cate && n.url === latestUrl);
-
-                // update db
-                await SentNews.findOneAndUpdate(
-                    { category: cate },
-                    {
-                        title: latestNews?.title ?? "",
-                        url: latestUrl,
-                        arrSentUrls: updatedUrls,
-                        sentAt: new Date()
-                    },
-                    { upsert: true, new: true }
-                );
-            }
+            // save to db
+            await saveToDB(newNews, SummaryResult, sentUrlsMap, MAX_URLS);
 
         } catch (error) {
             console.error("sendNews error:", error);

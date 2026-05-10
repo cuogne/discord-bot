@@ -1,6 +1,5 @@
 import { feedLinks } from "../resource/link.js"
-import { crawlRssNews } from "../script/crawl-rss.js";
-import { crawlHTMLNews } from "../script/crawl-html.js";
+import { schema, newsSchema } from "../db/newSchema.js";
 
 export async function latestSubCommand(interaction) {
     try {
@@ -8,27 +7,24 @@ export async function latestSubCommand(interaction) {
 
         const categoryOption = interaction.options.getString('category');
 
-        const feed = feedLinks.find(f => f.category === categoryOption);
-        const type = feed.type
-        const url = feed ? feed.url : null;
+        const newsData = await newsSchema.findOne({ category: categoryOption }).lean();
 
-        if (type == 'rss') {
-            const rssNewsArr = await crawlRssNews(url, categoryOption);
-            const rssNewsData = Array.isArray(rssNewsArr) ? rssNewsArr[rssNewsArr.length - 1] : rssNewsArr;
-            await interaction.editReply(
-                `📰 | **${rssNewsData.title}**\n\n${rssNewsData.url}`
-            );
-        } else if (type == 'html') {
-            const htmlNewsArr = await crawlHTMLNews(url, categoryOption);
-            const htmlNewsData = Array.isArray(htmlNewsArr) ? htmlNewsArr[htmlNewsArr.length - 1] : htmlNewsArr;
-            await interaction.editReply(
-                `📰 | **${htmlNewsData.title}**\n\n${htmlNewsData.url}`
-            );
+        if (!newsData) {
+            await interaction.editReply({
+                content: 'Chưa có tin tức nào được lưu cho category này.',
+            });
+            return;
         }
+
+        await interaction.editReply(
+            `📰 | **${newsData.title}**\n\n` +
+            `${newsData.summary.trim()}\n\n` +
+            `🔗 **Chi tiết xem tại: **${newsData.url}`
+        );
 
     } catch (error) {
         await interaction.editReply({
-            content: '❌ | Failed to fetch the latest news.',
+            content: 'Failed to fetch the latest news.',
         });
         console.error(error);
     }

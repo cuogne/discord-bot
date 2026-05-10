@@ -1,6 +1,7 @@
 import { feedLinks } from "../resource/link.js";
 import { crawlRssNews } from "../script/crawl-rss.js"
 import { crawlHTMLNews } from "../script/crawl-html.js"
+import { crawlApiNews } from "../script/crawl-api.js"
 
 export async function getListNews() {
     try {
@@ -9,6 +10,8 @@ export async function getListNews() {
                 return crawlRssNews(feed.url, feed.category);
             } else if (feed.type === 'html') {
                 return crawlHTMLNews(feed.url, feed.category);
+            } else if (feed.type === 'json') {
+                return crawlApiNews(feed.url, feed.category);
             } else {
                 return Promise.resolve(null);
             }

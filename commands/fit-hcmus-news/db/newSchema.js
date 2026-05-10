@@ -12,15 +12,15 @@ const userConfigSchema = new mongoose.Schema({
   categories: [String],
 });
 
-
-const sentNewsSchema = new mongoose.Schema({
+const newsConfigSchema = new mongoose.Schema({
   category: { type: String, required: true, unique: true },
-  arrSentUrls: { type: [String], default: [] },
+  listNewsUrl: { type: [String], default: [] },
   title: { type: String, required: true },
   url: { type: String, required: true },
+  summary: { type: String, required: true },
   sentAt: { type: Date, default: Date.now }
-});
+})
 
 
 export const schema = mongoose.model("schema", userConfigSchema);
-export const SentNews = mongoose.model("SentNews", sentNewsSchema);
+export const newsSchema = mongoose.model("newsSchema", newsConfigSchema);

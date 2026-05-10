@@ -22,5 +22,11 @@ export const feedLinks = [
         name: 'Thông tin dành cho sinh viên - HCMUS',
         category: 'hcmus',
         type: 'html'
+    },
+    {
+        url: 'https://www.ctda.hcmus.edu.vn/wp-json/wp/v2/posts?per_page=10&_fields=title,link',
+        name: 'Chương trình đề án (CLC/APCS) - CTDA@HCMUS)',
+        category: 'ctda',
+        type: 'json'
     }
 ];
