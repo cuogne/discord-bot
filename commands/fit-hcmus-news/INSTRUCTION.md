@@ -3,6 +3,7 @@
 
 ## Mục đích
 - Dành cho những sinh viên đang theo học tại HCMUS (ưu tiên sinh viên khoa CNTT vì có thông báo từ khoa FIT nữa) có thể cập nhật tin tức nhanh chóng từ web của trường (có nhiều tin tức và thông báo quan trọng mà các bạn thường lười lên web để check, trong đó có cả thằng chủ repo cũng lười vl). 
+- Các tin mới sẽ được AI Gemini tóm tắt các nội dung cơ bản để bạn có thể nắm sơ qua nội dung thông báo.
 - Bot sẽ tự động gửi vào server discord của bạn khi có tin mới từ các web của HCMUS.
 ## Demo
 
@@ -11,8 +12,15 @@
 | <img src="./demo/demo_laptop.png" height="220" /> | <img src="./demo/demo_mobile.png" height="250" /> | <img src="./demo/demo_notice.png" height="200" /> |
 
 
-## Yêu cầu
-- Hiện tại chỉ hỗ trợ nhận thông báo qua server trong ứng dụng Discord, vậy nên nếu bạn muốn sử dụng các tính năng này, [Discord](https://discord.com/) là thứ bắt buộc phải cài đặt trên máy của bạn.
+## Yêu cầu:
+
+Hiện tại mình có 2 phiên bản: Discord và Telegram
+
+- Discord: [Link bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands)
+
+- Telegram: [Link bot Telegram](https://t.me/hcmus_tintuc_bot)
+
+Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn.
 
 ## Command
 - `/fit-hcmus-news latest <category>`: trả về tin gần nhất dựa theo danh mục bạn chọn.
@@ -69,10 +77,13 @@
 
 Các web của HCMUS mà bot sẽ theo dõi để gửi thông báo (nguồn chính thống):
 
-+ FIT@HCMUS: https://www.fit.hcmus.edu.vn/vn/Default.aspx?tabid=53
-+ Lịch thi - Phòng khảo thí: http://ktdbcl.hcmus.edu.vn/
-+ Thông báo - Phòng khảo thí: http://ktdbcl.hcmus.edu.vn/
-+ Thông tin dành cho sinh viên - HCMUS: https://hcmus.edu.vn/category/dao-tao/dai-hoc/thong-tin-danh-cho-sinh-vien/page/1
+| Category                     | URL                                                                        |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| Thông tin dành cho sinh viên | https://hcmus.edu.vn/category/dao-tao/dai-hoc/thong-tin-danh-cho-sinh-vien |
+| Lịch thi - Phòng khảo thí    | https://ktdbcl.hcmus.edu.vn/index.php/cong-tac-kh-o-thi/l-ch-thi-h-c-ky    |
+| Thông báo - Phòng khảo thí   | https://ktdbcl.hcmus.edu.vn/index.php/thong-bao                            |
+| Khoa CNTT - FIT@HCMUS        | https://www.fit.hcmus.edu.vn/tin-tuc                                       |
+| CLC/APCS - CTĐA@HCMUS | https://www.ctda.hcmus.edu.vn/vi/thong-bao/ |
 
 ------------------
 
