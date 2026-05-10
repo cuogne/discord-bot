@@ -1,10 +1,13 @@
 node_modules
-npm-debug.log
-.env
 .git
+.env
+.env.local
+.env.*
 coverage
 logs
 tmp
 dist
 .DS_Store
 README.md
+*.log
+.github
