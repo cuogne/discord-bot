@@ -2,6 +2,68 @@ import { GoogleGenAI } from '@google/genai';
 import { getContentFromURL } from './getContent.js';
 import 'dotenv/config';
 
+const GEMINI_MODELS = [
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+];
+const GEMINI_TIMEOUT_MS = 30_000;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isQuotaError(err) {
+  const status = err?.status ?? err?.code ?? err?.statusCode;
+  const message = (err?.message ?? '').toString().toLowerCase();
+
+  return status === 429
+    || message.includes('429')
+    || message.includes('quota')
+    || message.includes('rate limit')
+    || message.includes('resource exhausted');
+}
+
+function isTimeoutError(err) {
+  return err?.name === 'TimeoutError';
+}
+
+function withTimeout(promise) {
+  return Promise.race([
+    promise,
+    sleep(GEMINI_TIMEOUT_MS).then(() => {
+      const err = new Error('Gemini request timed out');
+      err.name = 'TimeoutError';
+      throw err;
+    }),
+  ]);
+}
+
+async function generateContentWithFallback(ai, contents) {
+  let lastError;
+
+  for (const model of GEMINI_MODELS) {
+    try {
+      const response = await withTimeout(ai.models.generateContent({
+        model,
+        contents,
+      }));
+
+      return response;
+    } catch (err) {
+      lastError = err;
+
+      if (isQuotaError(err)) {
+        console.warn(`Gemini quota/rate limit hit for ${model}, trying next model...`);
+        continue;
+      }
+
+      throw err;
+    }
+  }
+
+  throw lastError;
+}
+
 export async function summarizeNewsWithGemini(content){
   if (!process.env.GEMINI_API_KEY) {
     console.log("ko co api key")
@@ -23,14 +85,11 @@ export async function summarizeNewsWithGemini(content){
 		Nội dung bài viết như sau: ${content}`;
 
   const ai = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY
+    apiKey: process.env.GEMINI_API_KEY_FOR_SUMMARY
   });
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-    });
+    const response = await generateContentWithFallback(ai, prompt);
 
     const rawText = typeof response.text === 'function' ? await response.text() : response.text;
     const result = (rawText ?? '').toString();
@@ -38,6 +97,10 @@ export async function summarizeNewsWithGemini(content){
     return result
   } catch (err) {
     console.error('Gemini command error:', err);
+    if (isTimeoutError(err)) {
+      return "";
+    }
+
     return "";
   }
 }

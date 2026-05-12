@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { splitTextSmartly } from './splitSmart.js';
 
-export function buildEmbedsFromText(text, { title, color }) {
+export function buildEmbedsFromText(text, { title, color, model, responseTime }) {
   const SAFE_DESC = 3800;
   const chunks = splitTextSmartly(text, SAFE_DESC);
 
@@ -14,11 +14,9 @@ export function buildEmbedsFromText(text, { title, color }) {
       embed.setTitle(title);
     }
 
-    if (chunks.length > 1) {
-      embed.setFooter({
-        text: `Gemini 2.5 Flash • Trang ${idx + 1}/${chunks.length}`,
-      });
-    }
+    embed.setFooter({
+      text: `${model} • Time Response: ${responseTime} • Trang ${idx + 1}/${chunks.length}`,
+    });
 
     return embed;
   });
