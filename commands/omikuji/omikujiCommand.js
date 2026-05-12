@@ -131,7 +131,7 @@ export async function omikujiCommand(interaction) {
     const { imagePath, randomImage } = getImagePathForOmikuji(resultOmikujiIdx);
     const attachment = new AttachmentBuilder(imagePath, { name: randomImage });
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
         await interaction.editReply("Vui lòng cung cấp API_KEY của Gemini trong .env để sử dụng lệnh này");
         return;
     }
