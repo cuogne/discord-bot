@@ -253,6 +253,7 @@ export const commands = [
                             { name: 'Lịch thi - KTĐBCL', value: 'lichthi' },
                             { name: 'Thông báo - KTĐBCL', value: 'thongbao' },
                             { name: 'Thông tin dành cho sinh viên - HCMUS', value: 'hcmus' },
+                            { name: 'Chương trình đề án - CLC/APCS', value: 'ctda' },
                         )
                 )
         )
