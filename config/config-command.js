@@ -18,17 +18,37 @@ import { pokemonCommand } from "../commands/pokemon/pokemonCommand.js";
 import { omikujiCommand } from "../commands/omikuji/omikujiCommand.js";
 import { geminiCommand } from "../commands/gemini/geminiCommand.js";
 import { giaxangCommand } from "../commands/giaxang/giaxangCommand.js";
+import { actionCommand } from "../commands/action/actionCommand.js";
 
 // handle selection
 import { handleMovieTodaySelection } from "../commands/cinestar/handler/handleMovieTodaySelection.js";
 import { handleUpcomingMovieSelection } from "../commands/cinestar/handler/handleUpcomingMovieSelection.js";
 import { handleSelectionMovieCGV } from "../commands/cgv/handleSelectionMovieCGV.js";
 
+import { actions } from "../commands/action/config.js";
+
 /* Syntax for adding command
    new SlashCommandBuilder()
        .setName('command_name')
        .setDescription('command_description')
 */
+const actionSlashCommand = Object.entries(actions).reduce(
+    (command, [action, actionText]) =>
+        command.addSubcommand(subcommand =>
+            subcommand
+                .setName(action)
+                .setDescription(`${actionText} một người bạn`)
+                .addUserOption(option =>
+                    option.setName('user')
+                        .setDescription(`Chọn người bạn muốn ${actionText}`)
+                        .setRequired(true)
+                )
+        ),
+    new SlashCommandBuilder()
+        .setName('action')
+        .setDescription("Chọn hành động")
+);
+
 export const commands = [
     new SlashCommandBuilder()
         .setName('date')
@@ -43,8 +63,8 @@ export const commands = [
                 .setDescription('Xem avatar của user được chọn')
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('Chọn user để xem avatar (để trống thì xem ảnh của bạn)')
-                        .setRequired(false)
+                        .setDescription('Chọn user để xem avatar')
+                        .setRequired(true)
                 )
         )
         .addSubcommand(subcommand =>
@@ -145,6 +165,7 @@ export const commands = [
                             { name: '🇫🇷 Ligue 1', value: 'fra.1' },
                             { name: '🇪🇺 UEFA Champions League', value: 'uefa.champions' },
                             { name: '🇪🇺 UEFA Europa League', value: 'uefa.europa' },
+                            { name: '🌎 FIFA World Cup 2026', value: 'fifa.world' }
                         )
                 )
         )
@@ -331,7 +352,10 @@ export const commands = [
     
     new SlashCommandBuilder()
         .setName('giaxang')
-        .setDescription('Xem giá xăng dầu trong nước hôm nay')
+        .setDescription('Xem giá xăng dầu trong nước hôm nay'),
+
+    actionSlashCommand,
+    
 ];
 
 // syntax: { command_name: command_function }
@@ -353,6 +377,7 @@ export const commandHandlers = {
     omikuji: omikujiCommand,
     gemini: geminiCommand,
     giaxang: giaxangCommand,
+    action: actionCommand,
 };
 
 // export handle selection

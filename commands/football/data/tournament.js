@@ -27,7 +27,10 @@ export const tournaments = {
         name: 'UEFA Europa League',
         img: 'https://images.seeklogo.com/logo-png/40/1/uefa-europa-league-2021-logo-png_seeklogo-404784.png'
     },
-    // fifa.world (World Cup)
+    'fifa.world': {
+        name: 'FIFA World Cup 2026',
+        img: 'https://cdn-images.vtv.vn/562122370168008704/2023/5/19/photo-1-1684468770024702863210.jpg'
+    },
     // uefa.european.championship (Euro)
     // uefa.champions (c1)
     // uefa.europa (c2)
