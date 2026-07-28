@@ -8,6 +8,7 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 
 | Command | Parameter | Description | Usage |
 |------|---------|-------|-----------|
+| `/action <punch,kick,...>` | `<user>` | Thực hiện hành động (đấm, đá, ôm, ...) với người dùng | `/action punch @cừn` |
 | `/ai` | `<prompt>` | Chat với AI Groq | `/ai Xin chào bạn` |
 | `/avatar` | `<user @user> / <server>`| Lấy avatar của user (riêng server phải mời bot vào mới lấy dc) | `/avatar @cừn` |
 | ~~`/cgv`~~ | ~~`<province>` `<cinema>`~~ | ~~Xem lịch chiếu phim tại CGV~~ | ~~`/cgv TP.HCM CGV Vincom Đồng Khởi`~~|
