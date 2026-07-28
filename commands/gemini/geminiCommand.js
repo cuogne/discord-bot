@@ -3,8 +3,8 @@ import { buildEmbedsFromText } from './utils/buildEmbedsFromText.js';
 import { batchEmbedsSafely } from './utils/batchEmbed.js';
 
 const GEMINI_MODELS = [
+  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
   { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-  { id: 'gemini-3-flash-preview', label: 'Gemini 3 Flash' },
   { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
 ];
 const GEMINI_TIMEOUT_MS = 120_000;

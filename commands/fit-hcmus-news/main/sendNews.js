@@ -83,7 +83,7 @@ export async function sendNews(client) {
 
                         await channel.send(
                             `📰 | **${news.title}**\n\n` +
-                            `${news.summary.trim()}\n\n` +
+                            `${news.summary.trim() ? `${news.summary.trim()}\n\n` : ''}` +
                             `🔗 **Chi tiết xem tại: **${news.url}`
                         );
 
