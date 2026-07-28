@@ -16,15 +16,19 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isQuotaError(err) {
+function isRetryableError(err) {
   const status = err?.status ?? err?.code ?? err?.statusCode;
   const message = (err?.message ?? '').toString().toLowerCase();
 
   return status === 429
+    || status === 503
     || message.includes('429')
+    || message.includes('503')
     || message.includes('quota')
     || message.includes('rate limit')
-    || message.includes('resource exhausted');
+    || message.includes('resource exhausted')
+    || message.includes('high demand')
+    || message.includes('unavailable');
 }
 
 function isTimeoutError(err) {
@@ -84,8 +88,8 @@ async function generateContentWithFallback(ai, contents) {
     } catch (err) {
       lastError = err;
 
-      if (isQuotaError(err)) {
-        console.warn(`Gemini quota/rate limit hit for ${model.id}, trying next model...`);
+      if (isRetryableError(err)) {
+        console.warn(`Gemini API error for ${model.id}: ${err?.status ?? 'unknown'} - ${err?.message ?? err}. Trying next model...`);
         continue;
       }
 
