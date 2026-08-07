@@ -1,3 +1,5 @@
+import { ESPN_HEADERS, logEspnError } from "../utils/espnFetch.js";
+
 function pad(str, len) {
     return str.length < len ? str + ' '.repeat(len - str.length) : str
 }
@@ -41,7 +43,7 @@ export async function footballRankCommand(interaction) {
         }
 
         const link = `https://site.web.api.espn.com/apis/v2/sports/soccer/${league}/standings?season=${season}`;
-        const res = await fetch(link);
+        const res = await fetch(link, { headers: ESPN_HEADERS });
         const data = await res.json();
 
         if (!data || !data.children || data.children.length === 0) {
@@ -90,6 +92,7 @@ export async function footballRankCommand(interaction) {
     }
     catch (error) {
         console.error('Error fetching football rank data:', error);
+        logEspnError('footballRankCommand', error, link);
         await interaction.editReply({
             content: '❌ Đã xảy ra lỗi khi lấy dữ liệu bảng xếp hạng.',
         });

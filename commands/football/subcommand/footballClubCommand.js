@@ -1,5 +1,6 @@
 import { club } from "../data/club.js";
 import { separateDate } from "../utils/separateDate.js";
+import { ESPN_HEADERS, logEspnError } from "../utils/espnFetch.js";
 
 export async function footballClubCommand(interaction) {
     await interaction.deferReply();
@@ -9,7 +10,7 @@ export async function footballClubCommand(interaction) {
     const link = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/${id_club}/schedule?fixture=true`
 
     try {
-        const response = await fetch(link);
+        const response = await fetch(link, { headers: ESPN_HEADERS });
         const data = await response.json();
 
         const fields = []
@@ -62,6 +63,7 @@ export async function footballClubCommand(interaction) {
     }
     catch (error) {
         console.error('Lỗi khi lấy lịch đá banh:', error);
+        logEspnError('footballClubCommand', error, link);
         await interaction.editReply('Có lỗi xảy ra khi lấy lịch đá banh.');
     }
 }

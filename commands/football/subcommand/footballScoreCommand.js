@@ -1,6 +1,7 @@
 import { getTodayAndYesterday } from "../utils/getTodayAndYesterday.js";
 import { getDayAndHour } from "../utils/getDayAndHour.js";
 import { formatMatchScore } from "../utils/formatMatchScore.js";
+import { ESPN_HEADERS, logEspnError } from "../utils/espnFetch.js";
 
 const TOURNAMENTS = {
     'eng.1': { name: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
@@ -26,7 +27,7 @@ export async function footballScoreCommand(interaction) {
             for (const date of listDate) {
                 const link = `http://site.api.espn.com/apis/site/v2/sports/soccer/${tournament}/scoreboard?dates=${date}`;
                 fetchPromises.push(
-                    fetch(link)
+                    fetch(link, { headers: ESPN_HEADERS })
                         .then(response => response.json())
                         .then(data => ({ data, tournament, date }))
                 );
@@ -120,5 +121,6 @@ export async function footballScoreCommand(interaction) {
     } catch (error) {
         await interaction.editReply('Có lỗi xảy ra khi lấy tỉ số bóng đá.');
         console.error(error);
+        logEspnError('footballScoreCommand', error);
     }
 }

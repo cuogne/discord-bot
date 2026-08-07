@@ -1,6 +1,7 @@
 import { tournaments } from "../data/tournament.js";
 import { separateDate } from "../utils/separateDate.js";
 import { getTodayAndTwoWeeksLater } from "../utils/getTodayAndTwoWeeksLater.js";
+import { ESPN_HEADERS, logEspnError } from "../utils/espnFetch.js";
 
 export async function footballTournamentCommand(interaction) {
     await interaction.deferReply();
@@ -13,11 +14,26 @@ export async function footballTournamentCommand(interaction) {
         
         const fetchMatchesForDate = async () => {
             const api = `http://site.api.espn.com/apis/site/v2/sports/soccer/${tournament}/scoreboard?dates=${listMatchDay[0]}-${listMatchDay[1]}`;
-            const res = await fetch(api);
+            const res = await fetch(api, { headers: ESPN_HEADERS });
+
+            const bodyText = await res.text();
+
             if (!res.ok) {
-                throw new Error(`API lỗi với status ${res.status}`);
+                console.error('=== CHI TIET LOI API ===');
+                console.error('Status:', res.status, `(${res.statusText})`);
+                console.error('Request URL:', api);
+                console.error('Request User-Agent:', res.headers.get('user-agent') || 'undefined');
+                console.error('Response Body:', bodyText.slice(0, 2000));
+                console.error('========================');
+
+                const err = new Error(`API lỗi với status ${res.status}`);
+                err.status = res.status;
+                err.statusText = res.statusText;
+                err.body = bodyText;
+                throw err;
             }
-            return res.json();
+
+            return JSON.parse(bodyText);
         };
 
         const data = await fetchMatchesForDate();
@@ -105,6 +121,7 @@ export async function footballTournamentCommand(interaction) {
 
     } catch (error) {
         console.error('Lỗi khi lấy lịch đá banh:', error);
+        logEspnError('footballTournamentCommand', error);
         await interaction.editReply('Có lỗi xảy ra khi lấy lịch đá banh.');
     }
 }
