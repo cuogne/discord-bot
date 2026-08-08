@@ -1,110 +1,15 @@
 import { GoogleGenAI } from '@google/genai';
-import { buildEmbedsFromText } from './utils/buildEmbedsFromText.js';
-import { batchEmbedsSafely } from './utils/batchEmbed.js';
-
-const GEMINI_MODELS = [
-  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-  { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
-];
-const GEMINI_TIMEOUT_MS = 120_000;
-const GEMINI_COOLDOWN_MS = 10_000;
-
-const userCooldowns = new Map();
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function isRetryableError(err) {
-  const status = err?.status ?? err?.code ?? err?.statusCode;
-  const message = (err?.message ?? '').toString().toLowerCase();
-
-  return status === 429
-    || status === 503
-    || message.includes('429')
-    || message.includes('503')
-    || message.includes('quota')
-    || message.includes('rate limit')
-    || message.includes('resource exhausted')
-    || message.includes('high demand')
-    || message.includes('unavailable');
-}
-
-function isTimeoutError(err) {
-  return err?.name === 'TimeoutError';
-}
-
-function getCooldownRemainingMs(userId) {
-  const lastRequestAt = userCooldowns.get(userId);
-
-  if (!lastRequestAt) {
-    return 0;
-  }
-
-  const elapsed = Date.now() - lastRequestAt;
-  return Math.max(0, GEMINI_COOLDOWN_MS - elapsed);
-}
-
-function markCooldown(userId) {
-  userCooldowns.set(userId, Date.now());
-}
-
-function formatResponseTime(ms) {
-  if (ms < 1000) {
-    return `${ms}ms`;
-  }
-
-  return `${(ms / 1000).toFixed(2)}s`;
-}
-
-function withTimeout(promise) {
-  return Promise.race([
-    promise,
-    sleep(GEMINI_TIMEOUT_MS).then(() => {
-      const err = new Error('Gemini request timed out');
-      err.name = 'TimeoutError';
-      throw err;
-    }),
-  ]);
-}
-
-async function generateContentWithFallback(ai, contents) {
-  let lastError;
-  const startedAt = Date.now();
-
-  for (const model of GEMINI_MODELS) {
-    try {
-      const response = await withTimeout(ai.models.generateContent({
-        model: model.id,
-        contents,
-      }));
-
-      return {
-        response,
-        model: model.label,
-        responseTime: formatResponseTime(Date.now() - startedAt),
-      };
-    } catch (err) {
-      lastError = err;
-
-      if (isRetryableError(err)) {
-        console.warn(`Gemini API error for ${model.id}: ${err?.status ?? 'unknown'} - ${err?.message ?? err}. Trying next model...`);
-        continue;
-      }
-
-      throw err;
-    }
-  }
-
-  throw lastError;
-}
+import { getCooldownRemainingMs, markCooldown } from './utils/cooldown.js';
+import { isTimeoutError } from './utils/errors.js';
+import { formatResponseTime } from './utils/timeout.js';
+import { generateContentStreamWithFallback } from './utils/geminiClient.js';
+import { StreamReplier } from './utils/streamReply.js';
 
 export async function geminiCommand(interaction) {
   if (!process.env.GEMINI_API_KEY) {
-    await interaction.reply({ 
-      content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này', 
-      ephemeral: true 
+    await interaction.reply({
+      content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này',
+      ephemeral: true,
     });
     return;
   }
@@ -122,39 +27,33 @@ export async function geminiCommand(interaction) {
   markCooldown(interaction.user.id);
 
   const prompt = interaction.options.getString('prompt');
-  const ai = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY 
+  const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
   });
 
   try {
     await interaction.deferReply();
 
-    const { response: result, model, responseTime } = await generateContentWithFallback(ai, prompt);
+    const { responseStream, model, startedAt } = await generateContentStreamWithFallback(ai, prompt);
 
-    const text = typeof result.text === 'function' ? await result.text() : result.text;
-    const safeText = (text ?? '').toString();
+    const replier = new StreamReplier(interaction);
 
-    if (!safeText.trim()) {
+    for await (const chunk of responseStream) {
+      if (chunk.text) {
+        await replier.append(chunk.text);
+      }
+    }
+
+    const safeText = replier.fullText.trim();
+    if (!safeText) {
       await interaction.editReply('Không nhận được phản hồi từ Gemini. Vui lòng thử lại.');
       return;
     }
 
-    const embeds = buildEmbedsFromText(safeText, {
-      title: 'Kết quả từ Gemini',
-      color: 0x1a73e8,
-      model,
-      responseTime,
-    });
+    const responseTime = formatResponseTime(Date.now() - startedAt);
+    replier.fullText += `\n\n-# ${model} • Time response: ${responseTime}`;
 
-    const batches = batchEmbedsSafely(embeds);
-
-    for (let i = 0; i < batches.length; i++) {
-      if (i === 0) {
-        await interaction.editReply({ embeds: batches[i] });
-      } else {
-        await interaction.followUp({ embeds: batches[i] });
-      }
-    }
+    await replier.finish();
   } catch (err) {
     console.error('Gemini command error:', err);
     const message = isTimeoutError(err)

@@ -10,6 +10,8 @@ import { EmbedBuilder } from "discord.js";
 const MAX_URLS = 20;                // upgrade 10 -> 20
 const SCAN_TIME = 1000 * 60 * 10    // scan news 10 minutes
 
+const SKIP_SUMMARY_CATEGORIES = ['lichthi', 'thongbao'];
+
 export async function sendNews(client) {
     const run = async () => {
         try {
@@ -28,11 +30,14 @@ export async function sendNews(client) {
             const SummaryResult = {} // title, url, summary
             for (const news of newNews) {
                 try {
-                    const content = await getContentFromURL(news.url);
-                    if (!content) continue;
-                    
-                    const summary = await summarizeNewsWithGemini(content);
-                    
+                    let summary = '';
+                    if (!SKIP_SUMMARY_CATEGORIES.includes(news.category)) {
+                        const content = await getContentFromURL(news.url);
+                        if (!content) continue;
+
+                        summary = await summarizeNewsWithGemini(content);
+                    }
+
                     SummaryResult[news.url] = {
                         title: news.title,
                         url: news.url,
