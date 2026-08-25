@@ -1,0 +1,69 @@
+import { SolarDate } from '@nghiavuive/lunar_date_vi';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import type { SlashCommand } from '../../types/command.ts';
+// check this lib calc lunar date: https://github.com/nacana22/lunar-date
+
+const command: SlashCommand = {
+  // prettier-ignore
+  data: new SlashCommandBuilder()
+    .setName('today')
+    .setDescription('Hiển thị ngày giờ hiện tại (âm và dương lịch)'),
+
+  async execute(interaction) {
+    await interaction.deferReply();
+
+    const nowDate = new Date();
+    const dateStr = nowDate
+      .toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+      })
+      .split(' ');
+
+    const timeNow = dateStr[0]!; // thoi gian
+    const solarDate = dateStr[1]!; // duong lich
+
+    const weekday = nowDate
+      .toLocaleDateString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        weekday: 'long',
+      })
+      .replace(/^\w/, (c) => c.toUpperCase());
+
+    const lunar = new SolarDate(nowDate).toLunarDate();
+    const lunarData = lunar.get();
+    const leapSuffix = lunarData.leap_month ? ' (nhuận)' : '';
+    const lunarDate = `${lunarData.day}/${lunarData.month}/${lunarData.year}${leapSuffix}`;
+
+    const luckyHours = lunar
+      .getLuckyHours()
+      .map(
+        ({ name, time }) =>
+          `· ${name} (${String(time[0]).padStart(2, '0')}:00 - ${String(time[1]).padStart(2, '0')}:00)`,
+      )
+      .join('\n');
+
+    const embeds = new EmbedBuilder()
+      .setColor(0x4285f4)
+      .setTitle(`📅 ${weekday}, ${solarDate}`)
+      .addFields(
+        { name: '🌞 Dương lịch', value: `**${solarDate}**`, inline: true },
+        { name: '🌙 Âm lịch', value: lunarDate, inline: true },
+        { name: '🕰️ Thời gian', value: `**${timeNow}**`, inline: true },
+        {
+          name: '🐲 Can chi',
+          value: `Tháng ${lunarData.month}${leapSuffix} năm **${lunar.getYearName()}**\nNgày **${lunar.getDayName()}** - Tháng **${lunar.getMonthName()}**`,
+          inline: false,
+        },
+        { name: '🍃 Tiết khí', value: `**${lunar.getSolarTerm()}**`, inline: true },
+      )
+      .addFields({ name: '⏰ Giờ hoàng đạo', value: luckyHours, inline: false })
+      .setFooter({ text: 'GMT+7 (Việt Nam)' })
+      .setTimestamp(nowDate);
+
+    await interaction.editReply({
+      embeds: [embeds],
+    });
+  },
+};
+
+export default command;
