@@ -1,6 +1,9 @@
 import { MessageFlags } from 'discord.js';
 import type { Client, Interaction } from 'discord.js';
 import { commandMap, commands } from '../commands/index.ts';
+import { sendCommandUsageLog } from '../logging/channel.ts';
+import { createCommandUsageContext } from '../logging/context.ts';
+import { logCommandUsage } from '../logging/console.ts';
 import { logger } from '../logging/logger.ts';
 import type { SelectHandler } from '../types/command.ts';
 import type { BotEvent } from '../types/event.ts';
@@ -51,6 +54,10 @@ const event: BotEvent = {
         } catch (replyError) {
           logger.error({ err: replyError }, 'Lỗi khi gửi thông báo lỗi');
         }
+      } finally {
+        const context = createCommandUsageContext(interaction);
+        logCommandUsage(context);
+        void sendCommandUsageLog(interaction, context);
       }
       return;
     }

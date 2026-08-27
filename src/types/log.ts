@@ -1,3 +1,9 @@
+export interface GeminiUsageLog {
+  responseTime: string;
+  tokensInput: number;
+  tokensOutput: number;
+}
+
 export interface CommandUsageLog {
   userId: string;
   user: string;
@@ -7,4 +13,5 @@ export interface CommandUsageLog {
   guild: string;
   channelId: string;
   channel: string;
+  gemini?: GeminiUsageLog;
 }

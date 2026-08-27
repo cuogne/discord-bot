@@ -1,41 +1,24 @@
-const VN_TIMEZONE = 'Asia/Ho_Chi_Minh';
+import { addDays as addDaysFns, parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
+import { VIETNAM_TIMEZONE } from '../../../utils/date.ts';
 
 export const FOOTBALL_EMBED_COLOR = 0x0099ff;
 
 export function addDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
+  return addDaysFns(date, days);
 }
 
 export function toEspnDate(date: Date): string {
   // yyyyMMdd base on timezone Asia/Ho_Chi_Minh
-  return new Intl.DateTimeFormat('sv-SE', {
-    timeZone: VN_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(date)
-    .replaceAll('-', '');
+  return formatInTimeZone(date, VIETNAM_TIMEZONE, 'yyyyMMdd');
 }
 
 export function formatKickoff(isoDate: string): { date: string; time: string } {
-  const parts = new Intl.DateTimeFormat('vi-VN', {
-    timeZone: VN_TIMEZONE,
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).formatToParts(new Date(isoDate));
-
-  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+  const date = parseISO(isoDate);
 
   return {
-    date: `${get('day')}-${get('month')}-${get('year')}`,
-    time: `${get('hour')}:${get('minute')}`,
+    date: formatInTimeZone(date, VIETNAM_TIMEZONE, 'dd-MM-yyyy'),
+    time: formatInTimeZone(date, VIETNAM_TIMEZONE, 'HH:mm'),
   };
 }
 

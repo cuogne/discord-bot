@@ -1,3 +1,4 @@
+import { isAfter, isBefore, parseISO } from 'date-fns';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { TOURNAMENTS } from '../data/tournaments.ts';
@@ -25,8 +26,8 @@ export async function handleFootballToday(interaction: ChatInputCommandInteracti
       month: m1,
     } = getVietnamDateParts(now);
 
-    const vnToday = new Date(`${vnTodayStr}T00:00:00+07:00`);
-    const vnTomorrow = addDays(new Date(`${vnTodayStr}T00:00:00+07:00`), 1);
+    const vnToday = parseISO(`${vnTodayStr}T00:00:00+07:00`);
+    const vnTomorrow = addDays(vnToday, 1);
 
     // prettier-ignore
     const {
@@ -35,7 +36,7 @@ export async function handleFootballToday(interaction: ChatInputCommandInteracti
       month: m2
     } = getVietnamDateParts(vnTomorrow);
 
-    const vnEndTomorrow = new Date(`${vnTomorrowStr}T23:59:59+07:00`);
+    const vnEndTomorrow = parseISO(`${vnTomorrowStr}T23:59:59+07:00`);
 
     // prettier-ignore
     const dates = [
@@ -53,10 +54,9 @@ export async function handleFootballToday(interaction: ChatInputCommandInteracti
       const away = getCompetitor(event, 'away');
       if (!home || !away) continue;
 
-      const matchDate = new Date(event.date);
-      const matchTimeMs = matchDate.getTime();
+      const matchDate = parseISO(event.date);
 
-      if (matchTimeMs < vnToday.getTime() || matchTimeMs > vnEndTomorrow.getTime()) {
+      if (isBefore(matchDate, vnToday) || isAfter(matchDate, vnEndTomorrow)) {
         continue;
       }
 
@@ -67,7 +67,7 @@ export async function handleFootballToday(interaction: ChatInputCommandInteracti
       const { date, time } = formatKickoff(event.date);
       const list = matchesByTournament.get(tournamentId) ?? [];
       list.push({
-        kickoffTime: matchTimeMs,
+        kickoffTime: matchDate.getTime(),
         text: `**${date} | ${time} |** ${home.team.displayName} vs ${away.team.displayName}`,
       });
       matchesByTournament.set(tournamentId, list);

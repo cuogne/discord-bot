@@ -1,4 +1,10 @@
-const TIMEZONE = 'Asia/Ho_Chi_Minh';
+import { formatInTimeZone } from 'date-fns-tz';
+
+export const VIETNAM_TIMEZONE = 'Asia/Ho_Chi_Minh';
+
+export function formatVietnamDateTime(date: Date): string {
+  return formatInTimeZone(date, VIETNAM_TIMEZONE, 'dd/MM/yyyy HH:mm:ss');
+}
 
 export interface VietnamDateParts {
   dateStr: string;
@@ -8,12 +14,7 @@ export interface VietnamDateParts {
 }
 
 export function getVietnamDateParts(date: Date = new Date()): VietnamDateParts {
-  const formatted = new Intl.DateTimeFormat('en-CA', {
-    timeZone: TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
+  const formatted = formatInTimeZone(date, VIETNAM_TIMEZONE, 'yyyy-MM-dd');
   const [year, month, day] = formatted.split('-').map(Number);
   return {
     dateStr: formatted,
@@ -30,12 +31,7 @@ export interface VietnamDate {
 }
 
 export function getTodayInVietnam(): VietnamDate {
-  const formatted = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
+  const formatted = formatInTimeZone(new Date(), VIETNAM_TIMEZONE, 'yyyy-MM-dd');
 
   const [year, month, day] = formatted.split('-').map(Number);
   return { year: year!, month: month!, day: day! };

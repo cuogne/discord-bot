@@ -1,3 +1,4 @@
+import { isAfter, parseISO } from 'date-fns';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { CLUBS } from '../data/clubs.ts';
@@ -19,9 +20,8 @@ export async function handleFootballClub(interaction: ChatInputCommandInteractio
       `https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/${clubId}/schedule?fixture=true`,
     );
 
-    const now = Date.now();
     const upcoming = (data.events ?? [])
-      .filter((event) => new Date(event.date).getTime() > now)
+      .filter((event) => isAfter(parseISO(event.date), new Date()))
       .slice(0, MAX_UPCOMING_MATCHES);
 
     if (upcoming.length === 0) {

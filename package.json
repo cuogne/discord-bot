@@ -21,6 +21,8 @@
     "@nghiavuive/lunar_date_vi": "^2.0.1",
     "axios": "^1.13.4",
     "cheerio": "^1.2.0",
+    "date-fns": "^4.4.0",
+    "date-fns-tz": "^3.2.0",
     "discord.js": "^14.25.1",
     "jsdom": "^29.1.1",
     "mongoose": "^9.1.5",

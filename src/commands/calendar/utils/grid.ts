@@ -1,3 +1,5 @@
+import { getDay, getDaysInMonth as getDaysInMonthFns } from 'date-fns';
+
 const CELL_WIDTH = 4;
 const UNDERLINE = '\u0332';
 
@@ -8,11 +10,11 @@ function underlineText(text: string): string {
 }
 
 function getDaysInMonth(month: number, year: number): number {
-  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return getDaysInMonthFns(new Date(year, month - 1, 1));
 }
 
 function getFirstWeekday(month: number, year: number): number {
-  return (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+  return (getDay(new Date(year, month - 1, 1)) + 6) % 7;
 }
 
 export function buildCalendarGrid(month: number, year: number, today: number): string {

@@ -6,6 +6,7 @@ import { GeminiConfigError } from '../../core/gemini/config.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { formatResponseTime } from '../../utils/format.ts';
 import { logger } from '../../logging/logger.ts';
+import { setGeminiUsageLog } from '../../logging/context.ts';
 import type { OmikujiGenerationResult } from './utils/client.ts';
 import { generateOmikujiMessage } from './utils/client.ts';
 import {
@@ -74,6 +75,13 @@ const command: SlashCommand = {
       return;
     }
 
+    const responseTime = formatResponseTime(Date.now() - startedAt);
+    setGeminiUsageLog(interaction, {
+      responseTime,
+      tokensInput: result.tokensInput,
+      tokensOutput: result.tokensOutput,
+    });
+
     logger.info(
       {
         userId: interaction.user.id,
@@ -82,7 +90,7 @@ const command: SlashCommand = {
         omikuji: omikujiName,
         topic,
         model: result.model,
-        responseTime: formatResponseTime(Date.now() - startedAt),
+        responseTime,
         tokensInput: result.tokensInput,
         tokensOutput: result.tokensOutput,
       },

@@ -1,6 +1,9 @@
+import { formatInTimeZone } from 'date-fns-tz';
+import { vi } from 'date-fns/locale/vi';
 import { SolarDate } from '@nghiavuive/lunar_date_vi';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
+import { VIETNAM_TIMEZONE } from '../../utils/date.ts';
 // check this lib calc lunar date: https://github.com/nacana22/lunar-date
 
 const command: SlashCommand = {
@@ -13,21 +16,12 @@ const command: SlashCommand = {
     await interaction.deferReply();
 
     const nowDate = new Date();
-    const dateStr = nowDate
-      .toLocaleString('vi-VN', {
-        timeZone: 'Asia/Ho_Chi_Minh',
-      })
-      .split(' ');
-
-    const timeNow = dateStr[0]!; // thoi gian
-    const solarDate = dateStr[1]!; // duong lich
-
-    const weekday = nowDate
-      .toLocaleDateString('vi-VN', {
-        timeZone: 'Asia/Ho_Chi_Minh',
-        weekday: 'long',
-      })
-      .replace(/^\w/, (c) => c.toUpperCase());
+    const timeNow = formatInTimeZone(nowDate, VIETNAM_TIMEZONE, 'HH:mm:ss');
+    const solarDate = formatInTimeZone(nowDate, VIETNAM_TIMEZONE, 'dd/MM/yyyy');
+    const weekday = formatInTimeZone(nowDate, VIETNAM_TIMEZONE, 'EEEE', { locale: vi }).replace(
+      /^./,
+      (character) => character.toUpperCase(),
+    );
 
     const lunar = new SolarDate(nowDate).toLunarDate();
     const lunarData = lunar.get();

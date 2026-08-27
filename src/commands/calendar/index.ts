@@ -53,7 +53,7 @@ const command: SlashCommand = {
       .setTitle(`🗓️ Tháng ${month} năm ${year}`)
       .setDescription(`\`\`\`\n${grid}\n\`\`\``)
       .setFooter({
-        text: `Hôm nay là ngày ${footerDate} · GMT+7 (Việt Nam)`,
+        text: `Hôm nay là ngày ${footerDate}`,
       });
 
     await interaction.editReply({

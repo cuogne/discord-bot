@@ -8,6 +8,7 @@ import { isTimeoutError } from '../../core/gemini/errors.ts';
 import { StreamReplier } from './utils/streamReply.ts';
 import { formatResponseTime } from '../../utils/format.ts';
 import { logger } from '../../logging/logger.ts';
+import { setGeminiUsageLog } from '../../logging/context.ts';
 
 const command: SlashCommand = {
   // prettier-ignore
@@ -78,6 +79,13 @@ const command: SlashCommand = {
 
       await replier.finish();
 
+      const responseTime = formatResponseTime(Date.now() - startedAt);
+      setGeminiUsageLog(interaction, {
+        responseTime,
+        tokensInput,
+        tokensOutput,
+      });
+
       logger.info(
         {
           userId: interaction.user.id,
@@ -85,7 +93,7 @@ const command: SlashCommand = {
           guildId: interaction.guildId ?? 'DM',
           options: { prompt },
           model,
-          responseTime: formatResponseTime(Date.now() - startedAt),
+          responseTime,
           tokensInput,
           tokensOutput,
         },

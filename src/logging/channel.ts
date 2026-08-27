@@ -2,7 +2,8 @@ import { EmbedBuilder } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { logger } from './logger.ts';
 import type { CommandUsageLog } from '../types/log.ts';
-import { formatLogTime, formatOptionValue, truncate } from './utils/format.ts';
+import { formatVietnamDateTime } from '../utils/date.ts';
+import { formatOptionValue, truncate } from './utils/format.ts';
 
 export async function sendCommandUsageLog(
   interaction: ChatInputCommandInteraction,
@@ -36,10 +37,7 @@ export async function sendCommandUsageLog(
       .setColor(0x5865f2)
       .setTitle('Command log')
       .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
-      .setDescription(
-        `${interaction.user} vừa sử dụng command: **${commandLabel}**\n` +
-          `🕒 **Thời gian:** ${formatLogTime(interaction.createdAt)}`,
-      )
+      .setDescription(`${interaction.user} vừa sử dụng command: **${commandLabel}**\n`)
       .addFields(
         {
           name: 'User',
@@ -57,11 +55,28 @@ export async function sendCommandUsageLog(
           inline: true,
         },
         {
+          name: 'Time',
+          value: formatVietnamDateTime(interaction.createdAt),
+          inline: false,
+        },
+        {
           name: 'Options',
           value: truncate(optionsText || 'Không có options'),
           inline: false,
         },
       );
+
+    if (logData.gemini) {
+      embed.addFields({
+        name: 'Gemini Usage',
+        value: [
+          `⏱️ Response time: **${logData.gemini.responseTime}**`,
+          `📥 Input tokens: **${logData.gemini.tokensInput}**`,
+          `📤 Output tokens: **${logData.gemini.tokensOutput}**`,
+        ].join('\n'),
+        inline: false,
+      });
+    }
 
     await channel.send({
       embeds: [embed],
