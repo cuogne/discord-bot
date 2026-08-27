@@ -1,16 +1,3 @@
-export interface GeminiModel {
-  id: string;
-  label: string;
-}
-
-export const GEMINI_MODELS: GeminiModel[] = [
-  { id: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Flash Lite' },
-  { id: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash' },
-  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-];
-
-export const GEMINI_TIMEOUT_MS = 30_000;
-
 export const GEMINI_COOLDOWN_MS = 10_000;
 
 export const GEMINI_SYSTEM_PROMPT = `Note on using Discord markdown formatting:

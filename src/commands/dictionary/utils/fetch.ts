@@ -1,4 +1,5 @@
 import type { DictionaryEntry } from '../types/types.ts';
+import { fetchWithTimeout } from '../../../utils/http.ts';
 
 const API_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en';
 
@@ -12,7 +13,7 @@ export class WordNotFoundError extends Error {
 export async function fetchDictionary(word: string): Promise<DictionaryEntry[]> {
   const link = `${API_URL}/${encodeURIComponent(word)}`;
 
-  const response = await fetch(link);
+  const response = await fetchWithTimeout(link);
   if (!response.ok) {
     throw new WordNotFoundError(word);
   }

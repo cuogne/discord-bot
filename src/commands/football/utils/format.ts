@@ -20,27 +20,6 @@ export function toEspnDate(date: Date): string {
     .replaceAll('-', '');
 }
 
-export function getVietnamDateParts(date: Date = new Date()): {
-  dateStr: string;
-  year: number;
-  month: number;
-  day: number;
-} {
-  const formatted = new Intl.DateTimeFormat('en-CA', {
-    timeZone: VN_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
-  const [year, month, day] = formatted.split('-').map(Number);
-  return {
-    dateStr: formatted,
-    year: year!,
-    month: month!,
-    day: day!,
-  };
-}
-
 export function formatKickoff(isoDate: string): { date: string; time: string } {
   const parts = new Intl.DateTimeFormat('vi-VN', {
     timeZone: VN_TIMEZONE,

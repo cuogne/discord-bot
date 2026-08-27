@@ -1,4 +1,5 @@
 import { logger } from '../../../logging/logger.ts';
+import { fetchWithTimeout } from '../../../utils/http.ts';
 
 const NEKOS_API = 'https://nekos.best/api/v2';
 
@@ -11,7 +12,7 @@ interface NekosResponse {
 export async function fetchActionImage(action: string): Promise<string> {
   const url = `${NEKOS_API}/${action}?amount=1`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: { 'User-Agent': 'hihi' },
   });
 

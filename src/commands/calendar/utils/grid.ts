@@ -16,7 +16,9 @@ function getFirstWeekday(month: number, year: number): number {
 }
 
 export function buildCalendarGrid(month: number, year: number, today: number): string {
-  const header = WEEKDAYS.map((day) => day.padEnd(CELL_WIDTH)).join('').trimEnd();
+  const header = WEEKDAYS.map((day) => day.padEnd(CELL_WIDTH))
+    .join('')
+    .trimEnd();
 
   const firstWeekday = getFirstWeekday(month, year);
   const daysInMonth = getDaysInMonth(month, year);

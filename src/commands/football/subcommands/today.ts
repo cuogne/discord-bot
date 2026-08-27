@@ -6,10 +6,10 @@ import {
   FOOTBALL_EMBED_COLOR,
   addDays,
   formatKickoff,
-  getVietnamDateParts,
   joinWithLimit,
   toEspnDate,
 } from '../utils/format.ts';
+import { getVietnamDateParts } from '../../../utils/date.ts';
 import { logger } from '../../../logging/logger.ts';
 
 export async function handleFootballToday(interaction: ChatInputCommandInteraction) {

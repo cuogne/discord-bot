@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 
 import { loadCommands } from './commands/index.ts';
-import { registerEvents } from './events/registerCommand.ts';
+import { registerEvents } from './events/registerEvents.ts';
 import { logger } from './logging/logger.ts';
 
 // #region Global error handlers
@@ -24,8 +24,8 @@ const client = new Client({
 });
 
 async function main() {
-  registerEvents(client);
   await loadCommands();
+  registerEvents(client);
   await client.login(process.env.BOT_TOKEN);
 }
 

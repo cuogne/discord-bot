@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { logger } from '../../../logging/logger.ts';
+import { HTTP_TIMEOUT_MS } from '../../../utils/http.ts';
 import type {
   EspnEvent,
   EspnCompetitor,
@@ -21,7 +22,7 @@ export class EspnApiError extends Error {
 
 export async function espnFetch<T>(url: string): Promise<T> {
   try {
-    const res = await axios.get<T>(url);
+    const res = await axios.get<T>(url, { timeout: HTTP_TIMEOUT_MS });
     return res.data;
   } catch (err) {
     if (err instanceof AxiosError && err.response) {

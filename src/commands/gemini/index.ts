@@ -1,11 +1,12 @@
 import { GoogleGenAI } from '@google/genai';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { GeminiConfigError } from '../../core/gemini/config.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { generateContentStreamWithFallback } from './utils/client.ts';
 import { getCooldownRemainingMs, markCooldown } from './utils/cooldown.ts';
-import { isTimeoutError } from './utils/errors.ts';
+import { isTimeoutError } from '../../core/gemini/errors.ts';
 import { StreamReplier } from './utils/streamReply.ts';
-import { formatResponseTime } from './utils/timeout.ts';
+import { formatResponseTime } from '../../utils/format.ts';
 import { logger } from '../../logging/logger.ts';
 
 const command: SlashCommand = {
@@ -92,9 +93,12 @@ const command: SlashCommand = {
       );
     } catch (err) {
       logger.error({ err }, 'Gemini command error');
-      const message = isTimeoutError(err)
-        ? 'AI dỏm nên phản hồi hơi lâu, hãy donate cho chủ bot để nâng cấp model.'
-        : 'Đã xảy ra lỗi khi gọi Gemini. Vui lòng thử lại.';
+      const message =
+        err instanceof GeminiConfigError
+          ? 'Chưa cấu hình GEMINI_MODELS, không thể sử dụng lệnh này.'
+          : isTimeoutError(err)
+            ? 'AI dỏm nên phản hồi hơi lâu, hãy donate cho chủ bot để nâng cấp model.'
+            : 'Đã xảy ra lỗi khi gọi Gemini. Vui lòng thử lại.';
 
       if (interaction.deferred || interaction.replied) {
         await interaction.editReply(message);
