@@ -2,12 +2,21 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandUsageLog, GeminiUsageLog } from '../types/log.ts';
 
 const commandUsageDetails = new WeakMap<ChatInputCommandInteraction, GeminiUsageLog>();
+const commandUsageErrors = new WeakMap<ChatInputCommandInteraction, string>();
 
 export function setGeminiUsageLog(
   interaction: ChatInputCommandInteraction,
   details: GeminiUsageLog,
 ): void {
   commandUsageDetails.set(interaction, details);
+}
+
+export function setCommandUsageError(
+  interaction: ChatInputCommandInteraction,
+  error: unknown,
+): void {
+  const message = error instanceof Error ? error.message : String(error);
+  commandUsageErrors.set(interaction, message);
 }
 
 export function createCommandUsageContext(
@@ -39,5 +48,6 @@ export function createCommandUsageContext(
     channelId: interaction.channelId,
     channel: channelName,
     gemini: commandUsageDetails.get(interaction),
+    error: commandUsageErrors.get(interaction),
   };
 }

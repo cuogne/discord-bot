@@ -2,7 +2,7 @@ import { MessageFlags } from 'discord.js';
 import type { Client, Interaction } from 'discord.js';
 import { commandMap, commands } from '../commands/index.ts';
 import { sendCommandUsageLog } from '../logging/channel.ts';
-import { createCommandUsageContext } from '../logging/context.ts';
+import { createCommandUsageContext, setCommandUsageError } from '../logging/context.ts';
 import { logCommandUsage } from '../logging/console.ts';
 import { logger } from '../logging/logger.ts';
 import type { SelectHandler } from '../types/command.ts';
@@ -38,7 +38,14 @@ const event: BotEvent = {
       try {
         await command.execute(interaction);
       } catch (error) {
-        logger.error({ err: error, command: interaction.commandName }, 'Lỗi khi chạy command');
+        setCommandUsageError(interaction, error);
+        logger.error(
+          {
+            err: error,
+            command: interaction.commandName,
+          },
+          'Lỗi khi chạy command',
+        );
         try {
           if (interaction.deferred || interaction.replied) {
             await interaction.followUp({
@@ -52,7 +59,12 @@ const event: BotEvent = {
             });
           }
         } catch (replyError) {
-          logger.error({ err: replyError }, 'Lỗi khi gửi thông báo lỗi');
+          logger.error(
+            {
+              err: replyError,
+            },
+            'Lỗi khi gửi thông báo lỗi',
+          );
         }
       } finally {
         const context = createCommandUsageContext(interaction);
@@ -64,12 +76,20 @@ const event: BotEvent = {
 
     if (interaction.isAutocomplete()) {
       const command = commandMap.get(interaction.commandName);
-      if (!command?.autocomplete) return;
+      if (!command?.autocomplete) {
+        return;
+      }
 
       try {
         await command.autocomplete(interaction);
       } catch (error) {
-        logger.error({ err: error, command: interaction.commandName }, 'Lỗi autocomplete');
+        logger.error(
+          {
+            err: error,
+            command: interaction.commandName,
+          },
+          'Lỗi autocomplete',
+        );
       }
       return;
     }
@@ -87,7 +107,13 @@ const event: BotEvent = {
       try {
         await handler(interaction);
       } catch (error) {
-        logger.error({ err: error, customId: interaction.customId }, 'Lỗi xử lý select menu');
+        logger.error(
+          {
+            err: error,
+            customId: interaction.customId,
+          },
+          'Lỗi xử lý select menu',
+        );
       }
     }
   },

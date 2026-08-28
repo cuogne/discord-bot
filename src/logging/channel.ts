@@ -28,6 +28,8 @@ export async function sendCommandUsageLog(
     }
 
     const subcommand = interaction.options.getSubcommand(false);
+    const attachment = interaction.options.getAttachment('attachment');
+
     const commandLabel = subcommand ? `/${logData.command} ${subcommand}` : `/${logData.command}`;
     const optionsText = Object.entries(logData.options)
       .map(([key, value]) => `• **${key}**: ${formatOptionValue(key, value)}`)
@@ -78,8 +80,37 @@ export async function sendCommandUsageLog(
       });
     }
 
+    if (logData.error) {
+      embed.addFields({
+        name: 'Error',
+        value: truncate(logData.error),
+        inline: false,
+      });
+    }
+
+    if (attachment?.contentType?.startsWith('image/')) {
+      embed.setImage(attachment.url);
+    }
+
+    if (attachment?.contentType === 'application/pdf') {
+      embed.addFields({
+        name: 'Attachment',
+        value: `[${attachment.name}](${attachment.url})`,
+        inline: false,
+      });
+    }
+
     await channel.send({
       embeds: [embed],
+      files:
+        attachment?.contentType === 'application/pdf'
+          ? [
+              {
+                attachment: attachment.url,
+                name: attachment.name,
+              },
+            ]
+          : [],
     });
   } catch (error) {
     logger.warn(

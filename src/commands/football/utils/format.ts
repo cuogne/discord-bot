@@ -17,7 +17,7 @@ export function formatKickoff(isoDate: string): { date: string; time: string } {
   const date = parseISO(isoDate);
 
   return {
-    date: formatInTimeZone(date, VIETNAM_TIMEZONE, 'dd-MM-yyyy'),
+    date: formatInTimeZone(date, VIETNAM_TIMEZONE, 'dd/MM/yyyy'),
     time: formatInTimeZone(date, VIETNAM_TIMEZONE, 'HH:mm'),
   };
 }

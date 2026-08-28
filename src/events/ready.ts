@@ -18,7 +18,12 @@ const event: BotEvent = {
       });
       logger.info('Slash commands are ready!');
     } catch (error) {
-      logger.error({ err: error }, 'Lỗi khi đăng ký commands');
+      logger.error(
+        {
+          err: error,
+        },
+        'Lỗi khi đăng ký commands',
+      );
     }
   },
 };

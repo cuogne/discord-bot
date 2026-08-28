@@ -47,14 +47,23 @@ const command: SlashCommand = {
       name: imageName,
     });
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
 
     const startedAt = Date.now();
     let result: OmikujiGenerationResult;
     try {
       result = await generateOmikujiMessage(ai, buildOmikujiPrompt(omikujiName, topic));
     } catch (err) {
-      logger.error({ err, omikuji: omikujiName, topic }, 'Omikuji command error');
+      logger.error(
+        {
+          err,
+          omikuji: omikujiName,
+          topic,
+        },
+        'Omikuji command error',
+      );
       const message =
         err instanceof GeminiConfigError
           ? 'Chưa cấu hình GEMINI_MODELS, không thể sử dụng lệnh này.'

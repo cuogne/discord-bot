@@ -14,4 +14,5 @@ export interface CommandUsageLog {
   channelId: string;
   channel: string;
   gemini?: GeminiUsageLog;
+  error?: string;
 }
