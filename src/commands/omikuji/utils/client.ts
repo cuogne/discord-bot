@@ -1,5 +1,5 @@
 import type { GoogleGenAI } from '@google/genai';
-import { generateWithModelFallback } from '../../../core/gemini/client.ts';
+import { generateWithModelFallback } from '../../../core/gemini/fallback.ts';
 
 export interface OmikujiGenerationResult {
   text: string;
@@ -16,7 +16,9 @@ export async function generateOmikujiMessage(
     ai.models.generateContent({
       model: modelId,
       contents: prompt,
-      config: { temperature: 0.7 },
+      config: {
+        temperature: 0.7,
+      },
     }),
   );
 

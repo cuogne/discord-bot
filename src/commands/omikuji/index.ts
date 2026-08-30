@@ -1,8 +1,8 @@
-import { GoogleGenAI } from '@google/genai';
 import { AttachmentBuilder, EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { GeminiConfigError } from '../../core/gemini/config.ts';
+import { getGeminiClient } from '../../core/gemini/client.ts';
+import { GeminiConfigError, isGeminiConfigured } from '../../core/gemini/config.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { formatResponseTime } from '../../utils/format.ts';
 import { logger } from '../../logging/logger.ts';
@@ -23,7 +23,7 @@ const command: SlashCommand = {
     .setDescription('Xem quẻ bói omikuji Nhật Bản'),
 
   async execute(interaction) {
-    if (!process.env.GEMINI_API_KEY) {
+    if (!isGeminiConfigured()) {
       await interaction.reply({
         content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này',
         flags: MessageFlags.Ephemeral,
@@ -47,9 +47,7 @@ const command: SlashCommand = {
       name: imageName,
     });
 
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
+    const ai = getGeminiClient();
 
     const startedAt = Date.now();
     let result: OmikujiGenerationResult;

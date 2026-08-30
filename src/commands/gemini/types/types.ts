@@ -1,3 +1,5 @@
+import type { GenerateContentResponse } from '@google/genai';
+
 export type GeminiAttachmentKind = 'image' | 'pdf';
 
 export interface GeminiAttachment {
@@ -7,4 +9,9 @@ export interface GeminiAttachment {
   mimeType: string;
   data: string;
   size: number;
+}
+
+export interface StreamResult {
+  responseStream: AsyncGenerator<GenerateContentResponse>;
+  model: string;
 }

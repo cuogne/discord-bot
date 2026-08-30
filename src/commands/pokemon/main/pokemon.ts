@@ -31,7 +31,9 @@ export async function handlePokemon(interaction: ChatInputCommandInteraction): P
     const species = await fetchPokemonSpecies(pokemon.species.url);
     const embed = buildPokemonEmbed(pokemon, species, identifier);
 
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.editReply({
+      embeds: [embed],
+    });
   } catch (error) {
     logger.error(
       {

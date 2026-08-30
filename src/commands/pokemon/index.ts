@@ -6,7 +6,7 @@ const command: SlashCommand = {
   // prettier-ignore
   data: new SlashCommandBuilder()
     .setName('pokemon')
-    .setDescription('Bắt thông tin Pokémon')
+    .setDescription('Bắt Pokémon!')
     .addStringOption((option) =>
       option
         .setName('id')

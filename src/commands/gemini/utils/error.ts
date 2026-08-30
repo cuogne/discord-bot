@@ -1,10 +1,14 @@
-import { GeminiConfigError } from '../../../core/gemini/config.ts';
+import { GeminiApiKeyError, GeminiConfigError } from '../../../core/gemini/config.ts';
 import { isTimeoutError } from '../../../core/gemini/errors.ts';
 import { GeminiAttachmentError } from '../utils/attachment.ts';
 
 export function getGeminiErrorMessage(error: unknown): string {
   if (error instanceof GeminiConfigError) {
     return 'Chưa cấu hình GEMINI_MODELS, không thể sử dụng lệnh này.';
+  }
+
+  if (error instanceof GeminiApiKeyError) {
+    return 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này';
   }
 
   if (error instanceof GeminiAttachmentError) {

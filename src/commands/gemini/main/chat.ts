@@ -1,18 +1,19 @@
-import { GoogleGenAI } from '@google/genai';
 import { MessageFlags } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { setCommandUsageError, setGeminiUsageLog } from '../../../logging/context.ts';
 import { logger } from '../../../logging/logger.ts';
 import { formatResponseTime } from '../../../utils/format.ts';
-import { generateContentStreamWithFallback } from '../utils/client.ts';
-import { getCooldownRemainingMs, markCooldown } from '../utils/cooldown.ts';
+import { isGeminiConfigured } from '../../../core/gemini/config.ts';
+import { getGeminiClient } from '../../../core/gemini/client.ts';
+import { generateContentStreamWithFallback } from './client.ts';
+import { handleCooldown, markCooldown } from '../utils/cooldown.ts';
 import { downloadGeminiAttachment } from '../utils/attachment.ts';
 import { buildAttachmentPreview } from '../utils/embed.ts';
 import { StreamReplier } from '../utils/streamReply.ts';
 import { getGeminiErrorMessage } from '../utils/error.ts';
 
 export async function handleGemini(interaction: ChatInputCommandInteraction): Promise<void> {
-  if (!process.env.GEMINI_API_KEY) {
+  if (!isGeminiConfigured()) {
     await interaction.reply({
       content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này',
       flags: MessageFlags.Ephemeral,
@@ -21,26 +22,17 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
   }
 
   // cooldown 10s for each request
-  const cooldownRemainingMs = getCooldownRemainingMs(interaction.user.id);
-  if (cooldownRemainingMs > 0) {
-    const cooldownRemainingSeconds = Math.ceil(cooldownRemainingMs / 1000);
-
-    await interaction.reply({
-      content: `Bạn chờ ${cooldownRemainingSeconds}s rồi dùng /gemini tiếp nha.`,
-      flags: MessageFlags.Ephemeral,
-    });
-
+  if (await handleCooldown(interaction)) {
     return;
   }
-
   markCooldown(interaction.user.id);
 
+  // handle Gemini prompt and attachment
   const prompt = interaction.options.getString('prompt', true);
+  const selectedModel = interaction.options.getString('model') ?? undefined;
   const selectedAttachment = interaction.options.getAttachment('attachment');
 
-  const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-  });
+  const ai = getGeminiClient();
 
   try {
     await interaction.deferReply();
@@ -57,11 +49,14 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
       });
     }
 
+    // generate content stream with fallback model
     const { responseStream, model } = await generateContentStreamWithFallback(
       ai,
       prompt,
       attachment,
+      selectedModel,
     );
+
     const replier = new StreamReplier(interaction);
     let tokensInput = 0;
     let tokensOutput = 0;
