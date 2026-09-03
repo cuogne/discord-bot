@@ -1,7 +1,7 @@
 node_modules
+dist
+*.tsbuildinfo
 .env
 config.json
 .DS_Store
-commands/cinestar/data/*.json
-commands/cgv/data/*.json
-commands/giaxang/data/*.json
+src/commands/cinestar/data/*.json

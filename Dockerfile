@@ -1,18 +1,18 @@
-FROM node:20-alpine
+FROM oven/bun:1-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package.json yarn.lock ./
+RUN apk add --no-cache tzdata
+ENV TZ=Asia/Ho_Chi_Minh
 
-RUN yarn install \
-    --frozen-lockfile \
-    --production=true \
-    && yarn cache clean
+COPY package.json bun.lock ./
 
-COPY --chown=node:node . .
+RUN bun install --frozen-lockfile --production
+
+COPY --chown=bun:bun . .
 
 ENV NODE_ENV=production
 
-USER node
+USER bun
 
-CMD ["node", "index.js"]
+CMD ["bun", "run", "src/index.ts"]

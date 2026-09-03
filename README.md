@@ -1,36 +1,35 @@
-# discord-bot-của-cừn
+# Bot Discord
 
-Một con bot discord sieu cap ngu xi dan don duoc viet bang javascript.
+mot con bot discord ngu xi dan don duoc viet bang ~~javascript~~ Typescript va bun.
 
 Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands)
 
 ## Commands
 
-| Command | Parameter | Description | Usage |
-|------|---------|-------|-----------|
-| `/action <punch,kick,...>` | `<user>` | Thực hiện hành động (đấm, đá, ôm, ...) với người dùng | `/action punch @cừn` |
-| `/ai` | `<prompt>` | Chat với AI Groq | `/ai Xin chào bạn` |
-| `/avatar` | `<user @user> / <server>`| Lấy avatar của user (riêng server phải mời bot vào mới lấy dc) | `/avatar @cừn` |
-| ~~`/cgv`~~ | ~~`<province>` `<cinema>`~~ | ~~Xem lịch chiếu phim tại CGV~~ | ~~`/cgv TP.HCM CGV Vincom Đồng Khởi`~~|
-| `/cinestar today` | `<cinema>` | Xem lịch chiếu phim hôm nay tại Cinestar | `/cinestar today Cinestar Sinh Viên - TP.HCM` |
-| `/cinestar upcoming` | *(không có)* | Xem lịch chiếu phim sắp tới tại Cinestar | `/cinestar upcoming` |
-| `/date` | *(không có)* | Hiển thị ngày giờ hiện tại (âm và dương lịch) | `/date` |
-| `/dictionary` | `<word>` | Tra cứu từ vụng tiếng Anh trong từ điển | `/dictionary care` |
-| `/fit-hcmus-news` | `setup\|latest\|status\|remove` | Nhận thông báo tin tức FIT-HCMUS | [Hướng dẫn chi tiết tại đây](commands/fit-hcmus-news/INSTRUCTION.md) |
-| `/football club` | `<club>` | Xem lịch thi đấu cụ thể của các câu lạc bộ bóng đá | `/football club Manchester United` |
-| `/football rank` | `<league> <season>` | Xem bảng xếp hạng bóng đá của các giải đấu Châu Âu theo mùa giải | `/football rank Premier League 2025` |
-| `/football score` | *(không có)* | Xem tỷ số bóng đá của các trận đấu đêm qua và rạng sáng nay | `/football score` |
-| `/football tournament` | `<tournament>` | Xem lịch thi đấu bóng đá của các giải đấu lớn (EPL, La Liga, ...) | `/football tournament Premier League` |
-| `/gemini` | `<prompt>` | Chat với AI Gemini | `/gemini Giải thích đoạn code sau: ...` |
-| `/giaxang` | *(không có)* | Xem giá xăng dầu hôm nay | `/giaxang` |
-| `/help` | *(không có)* | Hiển thị danh sách các lệnh có sẵn và còn hoạt động | `/help` |
-| `/image` | `<dog \| cat>` | Gửi hình ảnh ngẫu nhiên về chó hoặc mèo | `/image dog` |
-| `/omikuji` | *(không có)* | Xem quẻ bói omikuji Nhật Bản | `/omikuji` |
-| `/pokemon` | `<id \| name>` | Tra cứu thông tin Pokémon theo ID, tên hoặc random | `/pokemon pikachu` |
-| `/random` | `<ele1, ele2, ele3, ...>` | Trả về các từ ngẫu nhiên do user nhập vào được phân cách bởi dấu phẩy | `/random táo,cam,chuối` |
-| `/sbd` | `<text>` | Tra cứu điểm thi THPTQG 2025 | `/sbd 123456` |
-| `/translate` | `<to> <text>` | Dịch văn bản sang tiếng được chọn | `/translate English Xin chào` |
-
-> `/cgv` không còn hoạt động vì không chạy được trên cloud host
-
-> ...
+| Command | Options | Mô tả | Ví dụ |
+|---|---|---|---|
+| `/action` | `action`, `user` | Thực hiện hành động như hôn, ôm, tát, đấm, đá với user được chọn. | `/action hug user:@cừn` |
+| `/avatar user` | `user` | Xem avatar của user. | `/avatar user user:@cừn` |
+| `/avatar banner` | `user` | Xem banner của user nếu có. | `/avatar banner user:@cừn` |
+| `/avatar server` | — | Xem avatar của server. | `/avatar server` |
+| `/ban usebot` | `user`, `time`, `reason` | Cấm người dùng sử dụng bot. | `/ban usebot user:@cừn time:1 ngày reason:spam bot` |
+| `/calendar` | `month`, `year` | Hiển thị lịch của một tháng bất kỳ. | `/calendar month:8 year:2026` |
+| `/cinestar today` | `cinema` | Xem lịch chiếu phim hôm nay tại Cinestar. | `/cinestar today cinema:Cinestar Sinh Viên - TP.HCM` |
+| `/cinestar upcoming` | — | Xem danh sách phim sắp chiếu tại Cinestar. | `/cinestar upcoming` |
+| `/dictionary` | `text` | Tra từ điển tiếng Anh. | `/dictionary text:care` |
+| `/football club` | `club` | Xem lịch thi đấu của một câu lạc bộ. | `/football club club:Manchester United` |
+| `/football score` | — | Xem tỉ số các trận đấu gần đây. | `/football score` |
+| `/football today` | — | Xem các trận đấu hôm nay và ngày mai. | `/football today` |
+| `/football tournament` | `tournament` | Xem lịch thi đấu của một giải bóng đá. | `/football tournament tournament:Premier League` |
+| `/gemini` | `prompt`, `attachment` | Chat với AI Gemini, tự phân loại và phân tích ảnh hoặc file PDF. | `/gemini prompt:Phân tích file này attachment:tài liệu.pdf` |
+| `/giaxang` | — | Xem giá xăng dầu hôm nay. | `/giaxang` |
+| `/hcmus-news` | `setup\|latest\|status\|remove` | Nhận thông báo tin tức HCMUS | [Hướng dẫn chi tiết tại đây](src/commands/hcmus-news/INSTRUCTION.md) |
+| `/help` | — | Hiển thị danh sách câu lệnh và hướng dẫn sử dụng bot. | `/help` |
+| `/image` | `cat` hoặc `dog` | Xem ảnh ngẫu nhiên về mèo hoặc chó. | `/image dog` |
+| `/omikuji` | — | Xem quẻ bói Omikuji Nhật Bản. | `/omikuji` |
+| `/ping` | — | Pong! | `/ping` |
+| `/pokemon` | `id` hoặc `name` | Tra cứu Pokémon theo ID, tên hoặc nhận một Pokémon ngẫu nhiên. | `/pokemon name:pikachu` |
+| `/random` | `text` | Chọn ngẫu nhiên một mục trong danh sách phân cách bằng dấu phẩy. | `/random text:táo,cam,chuối` |
+| `/send` | `message` | Reply một tin nhắn bằng bot. | `/send message:Xin chào mọi người` |
+| `/today` | — | Hiển thị ngày giờ hiện tại theo dương lịch và âm lịch. | `/today` |
+| `/unban usebot` | `user` | Gỡ cấm người dùng sử dụng bot. | `/unban usebot user:@cừn` |
