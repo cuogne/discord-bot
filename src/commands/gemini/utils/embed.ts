@@ -7,7 +7,8 @@ export function buildAttachmentPreview(attachment: GeminiAttachment): EmbedBuild
   if (attachment.kind === 'image') {
     embed.setImage(attachment.url);
   } else {
-    embed.setDescription(`📄 [${attachment.name}](${attachment.url})`);
+    const icon = attachment.kind === 'pdf' ? '📄' : '📝';
+    embed.setDescription(`${icon} [${attachment.name}](${attachment.url})`);
   }
 
   return embed;

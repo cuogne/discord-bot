@@ -1,5 +1,5 @@
 import { logger } from '../../logging/logger.ts';
-import { getGeminiModels } from './config.ts';
+import { getGeminiModels, getGeminiTimeoutMs } from './config.ts';
 import { isRetryableError } from './errors.ts';
 import { withTimeout } from './timeout.ts';
 
@@ -22,7 +22,11 @@ export async function generateWithModelFallback<T>(
 
   for (const model of models) {
     try {
-      const result = await withTimeout(generate(model));
+      // prettier-ignore
+      const result = await withTimeout(
+        generate(model),
+        getGeminiTimeoutMs(model),
+      );
       return { result, model };
     } catch (err) {
       lastError = err;

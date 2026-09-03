@@ -23,7 +23,7 @@ const command: SlashCommand = {
     .addAttachmentOption((option) =>
       option
         .setName('attachment')
-        .setDescription('Ảnh (.png, .jpg, .jpeg, .webp) hoặc file PDF (tối đa 1 file 10MB).'),
+        .setDescription('Ảnh, PDF, hoặc file text/code (.txt, .md, .json, .py, ...) (tối đa 1 file 10MB).'),
     ),
 
   async execute(interaction) {

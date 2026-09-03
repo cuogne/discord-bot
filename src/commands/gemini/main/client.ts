@@ -13,9 +13,12 @@ export async function generateContentStreamWithFallback(
   const text = `${GEMINI_SYSTEM_PROMPT}\n\n${contents}`;
 
   // If there's an attachment, we need to send it as inline data along with the text.
+  // For text files, include the file name so the model knows the context.
+  const attachmentLabel =
+    attachment && attachment.kind === 'text' ? `\n\n[Attached file: ${attachment.name}]` : '';
   const requestContents: string | Part[] = attachment
     ? [
-        { text },
+        { text: `${text}${attachmentLabel}` },
         {
           inlineData: {
             mimeType: attachment.mimeType,

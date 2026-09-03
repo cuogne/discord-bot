@@ -14,6 +14,9 @@ export function isRetryableError(err: unknown): boolean {
   return (
     status === 429 ||
     status === 503 ||
+    e?.name === 'TimeoutError' ||
+    message.includes('timeout') ||
+    message.includes('timed out') ||
     message.includes('429') ||
     message.includes('503') ||
     message.includes('quota') ||

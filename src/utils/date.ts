@@ -1,9 +1,18 @@
 import { formatInTimeZone } from 'date-fns-tz';
 
 export const VIETNAM_TIMEZONE = 'Asia/Ho_Chi_Minh';
+export const VIETNAM_OFFSET_TZ = 7 * 60 * 60 * 1000;
+
+export function getVNTimeNow(): Date {
+  return new Date(Date.now() + VIETNAM_OFFSET_TZ);
+}
 
 export function formatVietnamDateTime(date: Date): string {
   return formatInTimeZone(date, VIETNAM_TIMEZONE, 'dd/MM/yyyy HH:mm:ss');
+}
+
+export function formatVNStoredDate(date: Date): string {
+  return formatInTimeZone(date, 'UTC', 'dd/MM/yyyy HH:mm:ss');
 }
 
 export interface VietnamDateParts {

@@ -1,6 +1,6 @@
 import type { GenerateContentResponse } from '@google/genai';
 
-export type GeminiAttachmentKind = 'image' | 'pdf';
+export type GeminiAttachmentKind = 'image' | 'pdf' | 'text';
 
 export interface GeminiAttachment {
   kind: GeminiAttachmentKind;

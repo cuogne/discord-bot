@@ -1,12 +1,14 @@
 import { MessageFlags } from 'discord.js';
 import type { Client, Interaction } from 'discord.js';
 import { commandMap, commands } from '../commands/index.ts';
+import { checkUserBanned } from '../core/ban/index.ts';
 import { sendCommandUsageLog } from '../logging/channel.ts';
 import { createCommandUsageContext, setCommandUsageError } from '../logging/context.ts';
 import { logCommandUsage } from '../logging/console.ts';
 import { logger } from '../logging/logger.ts';
 import type { SelectHandler } from '../types/command.ts';
 import type { BotEvent } from '../types/event.ts';
+import { formatVNStoredDate } from '../utils/date.ts';
 
 function getSelectHandler(customId: string): SelectHandler | undefined {
   const exactHandlers = new Map<string, SelectHandler>();
@@ -30,6 +32,21 @@ const event: BotEvent = {
       if (!command) {
         await interaction.reply({
           content: 'Command does not exist!',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      // check if user is banned
+      const banRecord = checkUserBanned(interaction.user.id);
+      if (banRecord) {
+        const expiryText = banRecord.expiresAt
+          ? `**${formatVNStoredDate(new Date(banRecord.expiresAt))}**`
+          : '**vĩnh viễn**';
+        const reasonText = banRecord.reason ? `\nLý do: *${banRecord.reason}*` : '';
+
+        await interaction.reply({
+          content: `Bạn đã bị cấm sử dụng bot đến ngày: ${expiryText}.${reasonText}`,
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -75,6 +92,10 @@ const event: BotEvent = {
     }
 
     if (interaction.isAutocomplete()) {
+      if (checkUserBanned(interaction.user.id)) {
+        return;
+      }
+
       const command = commandMap.get(interaction.commandName);
       if (!command?.autocomplete) {
         return;
@@ -95,6 +116,14 @@ const event: BotEvent = {
     }
 
     if (interaction.isStringSelectMenu()) {
+      if (checkUserBanned(interaction.user.id)) {
+        await interaction.reply({
+          content: 'Bạn đã bị cấm sử dụng bot.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
       const handler = getSelectHandler(interaction.customId);
       if (!handler) {
         await interaction.reply({

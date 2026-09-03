@@ -1,13 +1,13 @@
 import { REST, Routes } from 'discord.js';
 import type { Client } from 'discord.js';
 import { commands } from '../commands/index.ts';
+import { startHcmusNewsCron } from '../commands/hcmus-news/main/cron.ts';
 import { logger } from '../logging/logger.ts';
 import type { BotEvent } from '../types/event.ts';
 
 const event: BotEvent = {
   name: 'clientReady',
   once: true,
-
   async execute(client: Client<true>) {
     logger.info(`Tên bot: ${client.user.tag}!`);
 
@@ -25,6 +25,8 @@ const event: BotEvent = {
         'Lỗi khi đăng ký commands',
       );
     }
+
+    startHcmusNewsCron(client);
   },
 };
 
