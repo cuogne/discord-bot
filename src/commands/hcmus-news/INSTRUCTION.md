@@ -1,4 +1,4 @@
-## FIT-HCMUS News Bot
+## HCMUS News Bot
 
 - Một tính năng của bot cho phép bạn nhận các tin tức mới nhất từ các web của HCMUS.
 
