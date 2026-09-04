@@ -159,7 +159,7 @@ export async function handleSetupSubcommand(
         .addFields(
           { name: '📍 Kênh nhận tin', value: `<#${textChannel.id}>`, inline: true },
           { name: '🏠 Server', value: interaction.guild.name, inline: true },
-          { name: '👤 Thiết lập bởi', value: `<@${interaction.user.id}>`, inline: true },
+          { name: '👤 Setup bởi', value: `<@${interaction.user.id}>`, inline: true },
         )
         .setTimestamp();
 

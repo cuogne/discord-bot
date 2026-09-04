@@ -18,27 +18,24 @@ let cronTimeout: Timer | null = null;
 let isRunning = false;
 
 export async function processAndSendNews(client: Client): Promise<void> {
-  logger.info('Starting HCMUS news scan cycle...');
-
   try {
     const crawled = await crawlAllSources();
     if (crawled.length === 0) {
-      logger.info('No news crawled from sources');
+      // logger.info('No news crawled from sources');
       return;
     }
 
     const newNews = await filterNewNews(crawled);
     if (newNews.length === 0) {
-      logger.info('No new news to broadcast');
       return;
     }
 
-    logger.info(
-      {
-        count: newNews.length,
-      },
-      'New news detected',
-    );
+    // logger.info(
+    //   {
+    //     count: newNews.length,
+    //   },
+    //   'New news detected',
+    // );
 
     // Process each new news item (extract & summarize)
     const processedNews: ProcessedNewsItem[] = [];
@@ -52,7 +49,7 @@ export async function processAndSendNews(client: Client): Promise<void> {
           // category: item.category,
           // url: item.url,
         },
-        'New news item detected',
+        // 'New news item detected',
       );
 
       let summary = '';
@@ -123,12 +120,12 @@ export async function processAndSendNews(client: Client): Promise<void> {
       await pruneOldNews(category, 20);
     }
 
-    logger.info(
-      {
-        count: processedNews.length,
-      },
-      'Completed saving and broadcasting new news',
-    );
+    // logger.info(
+    //   {
+    //     count: processedNews.length,
+    //   },
+    //   'Completed saving and broadcasting new news',
+    // );
   } catch (error) {
     logger.error(
       {

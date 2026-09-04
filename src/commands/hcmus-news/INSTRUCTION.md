@@ -71,10 +71,16 @@ Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn
   <img src="./resources/image/hcmus-news-setup.png" alt="Fit HCMUS News commands" />
 </p>
 
-7. Chọn lệnh `/hcmus-news setup`, bạn sẽ thấy hiện ra 1 loạt channel như hình, bạn tìm tên của channel bạn đã tạo ở bước 5, chọn nó và nhấn Enter. Phần còn lại bạn cứ nhấn `Yes` để cho phép thiết lập là xong.
+7. Chọn lệnh `/hcmus-news setup`, bạn sẽ thấy hiện ra 1 loạt channel như hình, bạn tìm tên của channel bạn đã tạo ở bước 5, chọn nó và nhấn Enter.
 
 <p align="center">
   <img src="./resources/image/choose-a-channel.png" alt="Fit HCMUS News setup channel" />
+</p>
+
+Nhấn `Xác nhận` để hoàn tất thiết lập.
+
+<p align="center">
+  <img src="./resources/image/confirm.png" alt="confirm" />
 </p>
 
 8. Bạn sẽ nhận 2 thông báo, 1 thông báo báo rằng bạn đã setup thành công và 1 thông báo nằm trong kênh bạn đã chọn báo rằng kênh này đã được thiết lập để nhận thông báo từ bot.

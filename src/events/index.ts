@@ -1,4 +1,4 @@
-import interactionCreate from './interactionCreate.ts';
+import interactionCreate from './interaction.ts';
 import ready from './ready.ts';
 import type { BotEvent } from '../types/event.ts';
 

@@ -55,12 +55,12 @@ export async function handleStatusSubcommand(
           inline: false,
         },
         {
-          name: '👤 Người thiết lập',
+          name: '👤 Người setup',
           value: config.userId ? `<@${config.userId}>` : (config.userSetup ?? 'Không rõ'),
           inline: true,
         },
         {
-          name: '📅 Thời gian thiết lập',
+          name: '📅 Thời gian setup',
           value: `<t:${setupTimeSec}:F> (<t:${setupTimeSec}:R>)`,
           inline: true,
         },
