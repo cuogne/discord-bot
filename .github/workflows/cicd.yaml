@@ -9,6 +9,7 @@ jobs:
   check:
     name: Code Quality Check
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -47,6 +48,10 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/discord-bot:latest
+
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/discord-bot:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/discord-bot:latest
+
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -1,0 +1,10 @@
+services:
+  bot:
+    image: cuogne/discord-bot:latest
+    container_name: discord-bot
+    restart: unless-stopped
+    pull_policy: always
+    init: true
+    env_file: .env
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
