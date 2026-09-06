@@ -4,17 +4,12 @@ import { getVNTimeNow } from '../../utils/date.ts';
 import type { IBanRecord } from './types.ts';
 import { banRecordSchema } from './schema.ts';
 
-let banRecordModel: Model<IBanRecord> | null = null;
-
 function getBanRecordModel(): Model<IBanRecord> {
-  if (!banRecordModel) {
-    const connection = useMongoDatabase().getConnection();
-    banRecordModel =
-      (connection.models.BotBan as Model<IBanRecord>) ||
-      connection.model<IBanRecord>('BotBan', banRecordSchema);
-  }
-
-  return banRecordModel;
+  const connection = useMongoDatabase().getConnection();
+  return (
+    (connection.models.BotBan as Model<IBanRecord>) ||
+    connection.model<IBanRecord>('BotBan', banRecordSchema)
+  );
 }
 
 export async function upsertBanRecord(

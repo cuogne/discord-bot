@@ -1,7 +1,7 @@
 import { REST, Routes } from 'discord.js';
 import type { Client } from 'discord.js';
 import { commands } from '../commands/index.ts';
-import { startHcmusNewsCron } from '../commands/hcmus-news/main/cron.ts';
+import { startCron } from '../commands/hcmus-news/main/scheduler.ts';
 import { logger } from '../logging/logger.ts';
 import type { BotEvent } from '../types/event.ts';
 
@@ -26,7 +26,8 @@ const event: BotEvent = {
       );
     }
 
-    startHcmusNewsCron(client);
+    // comment this to disable the cron job
+    startCron(client);
   },
 };
 

@@ -1,6 +1,7 @@
 import { logger } from '../../logging/logger.ts';
 import { DatabaseConnectionError } from './errors.ts';
 import type { Database } from './interface.ts';
+import { registerDatabases } from './register.ts';
 import { listDatabases } from './registry.ts';
 
 /**
@@ -36,6 +37,7 @@ export async function connectDatabase(database: Database, isPrimary = false): Pr
 
 /** Connect all registered databases in registration order. */
 export async function connectDatabases(): Promise<void> {
+  registerDatabases();
   for (const database of listDatabases()) {
     await connectDatabase(database);
   }

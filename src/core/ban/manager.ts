@@ -34,14 +34,14 @@ export async function initBanManager(): Promise<void> {
       {
         count: activeBans.size,
       },
-      'Đã tải danh sách cấm sử dụng bot vào bộ nhớ',
+      'Loaded active bot bans into memory',
     );
   } catch (error) {
     logger.error(
       {
         err: error,
       },
-      'Lỗi khi tải danh sách cấm sử dụng bot',
+      'Failed to load active bot bans',
     );
   }
 }
@@ -63,7 +63,7 @@ export function checkUserBanned(userId: string): IBanRecord | null {
           err,
           userId,
         },
-        'Lỗi khi xóa bản ghi cấm đã hết hạn',
+        'Failed to delete expired bot ban record',
       );
     });
     return null;

@@ -4,18 +4,12 @@ import { logger } from '../../../../logging/logger.ts';
 import type { INewsConfig, NewsCategory, ProcessedNewsItem } from '../../types/types.ts';
 import { newsConfigSchema } from './schema.ts';
 
-let newsConfigModel: Model<INewsConfig> | null = null;
-
 function getNewsConfigModel(): Model<INewsConfig> {
-  if (!newsConfigModel) {
-    const connection = useMongoDatabase().getConnection();
-
-    newsConfigModel =
-      (connection.models.NewsConfig as Model<INewsConfig>) ||
-      connection.model<INewsConfig>('NewsConfig', newsConfigSchema);
-  }
-
-  return newsConfigModel;
+  const connection = useMongoDatabase().getConnection();
+  return (
+    (connection.models.NewsConfig as Model<INewsConfig>) ||
+    connection.model<INewsConfig>('NewsConfig', newsConfigSchema)
+  );
 }
 
 export async function getExistingNewsUrls(urls: string[]): Promise<Set<string>> {

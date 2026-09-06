@@ -1,6 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { logger } from '../../../logging/logger.ts';
-import { HTTP_TIMEOUT_MS } from '../../../utils/http.ts';
+import {
+  getHttpRetryDelay,
+  HTTP_MAX_RETRIES,
+  HTTP_TIMEOUT_MS,
+  isRetryableHttpStatus,
+} from '../../../utils/http.ts';
 import type {
   EspnEvent,
   EspnCompetitor,
@@ -21,20 +26,35 @@ export class EspnApiError extends Error {
 }
 
 export async function espnFetch<T>(url: string): Promise<T> {
-  try {
-    const res = await axios.get<T>(url, { timeout: HTTP_TIMEOUT_MS });
-    return res.data;
-  } catch (err) {
-    if (err instanceof AxiosError && err.response) {
-      const status = err.response.status;
-      const body =
-        typeof err.response.data === 'string'
-          ? err.response.data
-          : JSON.stringify(err.response.data);
-      logger.error({ url, status, body: body.slice(0, 2000) }, 'ESPN API error');
-      throw new EspnApiError(`ESPN API lỗi với status ${status}`, url, status, body);
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      const res = await axios.get<T>(url, { timeout: HTTP_TIMEOUT_MS });
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const status = error.response.status;
+        if (isRetryableHttpStatus(status) && attempt < HTTP_MAX_RETRIES) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, getHttpRetryDelay(attempt, error.response?.headers['retry-after'])),
+          );
+          continue;
+        }
+
+        const body =
+          typeof error.response.data === 'string'
+            ? error.response.data
+            : JSON.stringify(error.response.data);
+        logger.error({ url, status, body: body.slice(0, 2000) }, 'ESPN API error');
+        throw new EspnApiError(`ESPN API lỗi với status ${status}`, url, status, body);
+      }
+
+      if (axios.isAxiosError(error) && attempt < HTTP_MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, getHttpRetryDelay(attempt)));
+        continue;
+      }
+
+      throw error;
     }
-    throw err;
   }
 }
 
@@ -57,7 +77,17 @@ export async function fetchScoreboardsForDates(
             tournamentId,
             data,
           }))
-          .catch(() => null),
+          .catch((error) => {
+            logger.warn(
+              {
+                err: error,
+                tournamentId,
+                date,
+              },
+              'Failed to fetch ESPN scoreboard',
+            );
+            return null;
+          }),
       );
     }
   }

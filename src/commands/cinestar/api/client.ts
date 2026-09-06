@@ -1,4 +1,5 @@
 import { fetchWithTimeout } from '../../../utils/http.ts';
+import { logger } from '../../../logging/logger.ts';
 import type {
   CachedMovie,
   Cinema,
@@ -49,7 +50,18 @@ async function fetchMovieData(
   const response = await fetchWithTimeout(
     `https://cinestar.com.vn/api/showTime/?${params.toString()}`,
   );
-  if (!response.ok) return [];
+  if (!response.ok) {
+    logger.warn(
+      {
+        movieId: id,
+        cinema: cinema.name,
+        date: day,
+        status: response.status,
+      },
+      'Cinestar showtime request failed',
+    );
+    return [];
+  }
 
   const data = (await response.json()) as ShowtimesResponse;
   return data.data?.filter((movie) => movie.id != null) ?? [];
@@ -102,7 +114,16 @@ export async function fetchTodayMovies(cinema: Cinema, date: string): Promise<Ca
       try {
         const movies = await fetchMovieData(id, cinema, day);
         return movies.flatMap((movie) => toCachedMovies(movie, date, cinema));
-      } catch {
+      } catch (error) {
+        logger.warn(
+          {
+            err: error,
+            movieId: id,
+            cinema: cinema.name,
+            date,
+          },
+          'Failed to fetch Cinestar movie showtimes',
+        );
         return [];
       }
     }),

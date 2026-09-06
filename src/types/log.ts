@@ -13,6 +13,7 @@ export interface CommandUsageLog {
   guild: string;
   channelId: string;
   channel: string;
+  durationMs?: number;
   gemini?: GeminiUsageLog;
   error?: string;
 }

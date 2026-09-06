@@ -4,18 +4,12 @@ import { getVNTimeNow } from '../../../../utils/date.ts';
 import type { IUserConfig } from '../../types/types.ts';
 import { userConfigSchema } from './schema.ts';
 
-let userConfigModel: Model<IUserConfig> | null = null;
-
 function getUserConfigModel(): Model<IUserConfig> {
-  if (!userConfigModel) {
-    const connection = useMongoDatabase().getConnection();
-
-    userConfigModel =
-      (connection.models.UserConfig as Model<IUserConfig>) ||
-      connection.model<IUserConfig>('UserConfig', userConfigSchema);
-  }
-
-  return userConfigModel;
+  const connection = useMongoDatabase().getConnection();
+  return (
+    (connection.models.UserConfig as Model<IUserConfig>) ||
+    connection.model<IUserConfig>('UserConfig', userConfigSchema)
+  );
 }
 
 export async function getUserConfig(guildId: string): Promise<IUserConfig | null> {

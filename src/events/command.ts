@@ -24,6 +24,15 @@ async function replyBannedMessage(interaction: ChatInputCommandInteraction, banR
 
 export async function executeCommand(interaction: ChatInputCommandInteraction) {
   const command = commandMap.get(interaction.commandName);
+  const subcommand = interaction.options.getSubcommand(false);
+  const commandContext = {
+    command: interaction.commandName,
+    ...(subcommand ? { subcommand } : {}),
+    userId: interaction.user.id,
+    guildId: interaction.guildId ?? 'DM',
+    channelId: interaction.channelId,
+  };
+  const startedAt = Date.now();
 
   if (!command) {
     await interaction.reply({
@@ -36,6 +45,7 @@ export async function executeCommand(interaction: ChatInputCommandInteraction) {
   // check if user is banned
   const banRecord = checkUserBanned(interaction.user.id);
   if (banRecord) {
+    logger.warn(commandContext, 'Blocked command from banned user');
     await replyBannedMessage(interaction, banRecord);
     return;
   }
@@ -48,7 +58,8 @@ export async function executeCommand(interaction: ChatInputCommandInteraction) {
     logger.error(
       {
         err: error,
-        command: interaction.commandName,
+        ...commandContext,
+        durationMs: Date.now() - startedAt,
       },
       'Error executing command',
     );
@@ -68,12 +79,14 @@ export async function executeCommand(interaction: ChatInputCommandInteraction) {
       logger.error(
         {
           err: replyError,
+          ...commandContext,
         },
         'Error sending error message',
       );
     }
   } finally {
     const context = createCommandUsageContext(interaction);
+    context.durationMs = Date.now() - startedAt;
     logCommandUsage(context);
     void sendCommandUsageLog(interaction, context);
   }

@@ -10,12 +10,7 @@ import { summarizeNewsWithGemini } from '../core/gemini.ts';
 import type { NewsCategory, ProcessedNewsItem } from '../types/types.ts';
 import { sendNewsToGuild, sleep } from './sendNews.ts';
 
-const SCAN_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-
 const SKIP_SUMMARY_CATEGORIES: ReadonlySet<NewsCategory> = new Set(['lichthi', 'thongbao']);
-
-let cronTimeout: Timer | null = null;
-let isRunning = false;
 
 export async function processAndSendNews(client: Client): Promise<void> {
   try {
@@ -93,6 +88,15 @@ export async function processAndSendNews(client: Client): Promise<void> {
       await sleep(500);
     }
 
+    // save news to database
+    await saveNewsItems(processedNews);
+    logger.info(
+      {
+        count: processedNews.length,
+      },
+      `Saved ${processedNews.length} new news items to database`,
+    );
+
     // Get active servers
     const activeConfigs = await getActiveUserConfigs();
     if (activeConfigs.length > 0) {
@@ -112,9 +116,6 @@ export async function processAndSendNews(client: Client): Promise<void> {
       );
     }
 
-    // Save to database
-    await saveNewsItems(processedNews);
-
     // Prune old news (keep max 20 per category)
     for (const category of affectedCategories) {
       await pruneOldNews(category, 20);
@@ -133,41 +134,5 @@ export async function processAndSendNews(client: Client): Promise<void> {
       },
       'Error during HCMUS news scan cycle',
     );
-  }
-}
-
-export function startHcmusNewsCron(client: Client): void {
-  logger.info('Starting HCMUS news cron job (every 10 minutes)');
-
-  const runCycle = async () => {
-    if (isRunning) {
-      logger.warn('Previous news scan cycle is still running, skipping this tick');
-      return;
-    }
-
-    isRunning = true;
-    try {
-      await processAndSendNews(client);
-    } catch (err) {
-      logger.error(
-        {
-          err,
-        },
-        'Unexpected error in HCMUS news cron job',
-      );
-    } finally {
-      isRunning = false;
-      cronTimeout = setTimeout(() => void runCycle(), SCAN_INTERVAL_MS);
-    }
-  };
-
-  // Run initial cycle after 5 seconds of bot startup
-  setTimeout(() => void runCycle(), 5_000);
-}
-
-export function stopHcmusNewsCron(): void {
-  if (cronTimeout) {
-    clearTimeout(cronTimeout);
-    cronTimeout = null;
   }
 }

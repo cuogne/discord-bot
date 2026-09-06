@@ -10,6 +10,7 @@ export class StreamReplier {
   private readonly interaction: ChatInputCommandInteraction;
   private lastEditTime = 0;
   private readonly followUpMessages: Message[] = [];
+  private updateQueue: Promise<void> = Promise.resolve();
 
   constructor(interaction: ChatInputCommandInteraction) {
     this.interaction = interaction;
@@ -21,14 +22,20 @@ export class StreamReplier {
     const now = Date.now();
     if (now - this.lastEditTime >= THROTTLE_MS) {
       this.lastEditTime = now;
-      return this.updateMessages(false);
+      return this.queueUpdate(false);
     }
 
     return Promise.resolve();
   }
 
   finish(): Promise<void> {
-    return this.updateMessages(true);
+    return this.queueUpdate(true);
+  }
+
+  private queueUpdate(isFinal: boolean): Promise<void> {
+    const update = this.updateQueue.then(() => this.updateMessages(isFinal));
+    this.updateQueue = update.catch(() => undefined);
+    return update;
   }
 
   private async updateMessages(isFinal = false): Promise<void> {

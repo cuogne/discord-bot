@@ -62,6 +62,11 @@ export async function sendCommandUsageLog(
           inline: false,
         },
         {
+          name: 'Duration',
+          value: logData.durationMs !== undefined ? `${logData.durationMs} ms` : 'Không rõ',
+          inline: true,
+        },
+        {
           name: 'Options',
           value: truncate(optionsText || 'Không có options'),
           inline: false,

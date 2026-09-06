@@ -39,6 +39,10 @@ const command: SlashCommand = {
     }
 
     try {
+      // use deferReply instead of reply to avoid the "interaction failed" error
+      // when fetching the image takes too long
+      await interaction.deferReply();
+
       const actionImage = await fetchActionImage(action);
 
       const embed = new EmbedBuilder()
@@ -46,7 +50,7 @@ const command: SlashCommand = {
         .setImage(actionImage)
         .setColor(0xff6b6b);
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
       });
     } catch (error) {
@@ -62,9 +66,8 @@ const command: SlashCommand = {
 
       const message = `Không lấy được gif ${actionText} rồi, thử lại sau nha.`;
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
+        await interaction.editReply({
           content: message,
-          flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.reply({

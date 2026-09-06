@@ -14,12 +14,12 @@ const command: SlashCommand = {
         .setDescription('Nhập câu hỏi hoặc yêu cầu của bạn')
         .setRequired(true),
     )
-    .addStringOption((option) =>
-      option
-        .setName('model')
-        .setDescription('Chọn mô hình Gemini (mặc định là model đầu tiên)')
-        .setAutocomplete(true),
-    )
+    // .addStringOption((option) =>
+    //   option
+    //     .setName('model')
+    //     .setDescription('Chọn mô hình Gemini (mặc định là model đầu tiên)')
+    //     .setAutocomplete(true),
+    // )
     .addAttachmentOption((option) =>
       option
         .setName('attachment')
