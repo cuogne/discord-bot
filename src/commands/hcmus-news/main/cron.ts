@@ -4,13 +4,14 @@ import { getVNTimeNow } from '../../../utils/date.ts';
 import { crawlAllSources } from '../core/crawler.ts';
 import { getActiveUserConfigs } from '../core/database/config.ts';
 import { pruneOldNews, saveNewsItems } from '../core/database/news.ts';
-import { extractArticleContent } from '../core/extractor.ts';
+import { extractArticleContent } from '../core/extractor/index.ts';
 import { filterNewNews } from '../core/filter.ts';
 import { summarizeNewsWithGemini } from '../core/gemini.ts';
 import type { NewsCategory, ProcessedNewsItem } from '../types/types.ts';
 import { sendNewsToGuild, sleep } from './sendNews.ts';
 
 const SKIP_SUMMARY_CATEGORIES: ReadonlySet<NewsCategory> = new Set(['lichthi', 'thongbao']);
+const MAX_NEWS_PER_CATEGORY = 20;
 
 export async function processAndSendNews(client: Client): Promise<void> {
   try {
@@ -90,6 +91,10 @@ export async function processAndSendNews(client: Client): Promise<void> {
 
     // save news to database
     await saveNewsItems(processedNews);
+    for (const category of affectedCategories) {
+      await pruneOldNews(category, MAX_NEWS_PER_CATEGORY);
+    }
+
     logger.info(
       {
         count: processedNews.length,
@@ -115,18 +120,6 @@ export async function processAndSendNews(client: Client): Promise<void> {
         ),
       );
     }
-
-    // Prune old news (keep max 20 per category)
-    for (const category of affectedCategories) {
-      await pruneOldNews(category, 20);
-    }
-
-    // logger.info(
-    //   {
-    //     count: processedNews.length,
-    //   },
-    //   'Completed saving and broadcasting new news',
-    // );
   } catch (error) {
     logger.error(
       {
