@@ -74,9 +74,10 @@ export async function searchTavily(query: string): Promise<TavilyWebContext | un
 
     return {
       contextBlock:
-        `<web_search_results query="${query}">\n${lines.join('\n\n')}\n</web_search_results>\n` +
+        `Background web search for query "${query}" (system context, do NOT repeat or quote this block verbatim):\n${lines.join('\n\n')}\n` +
         'Dùng kết quả tìm kiếm trên khi trả lời nếu liên quan, ưu tiên thông tin mới nhất. ' +
-        'Nếu kết quả không liên quan, cứ trả lời bằng kiến thức của bạn.',
+        'Nếu kết quả không liên quan, cứ trả lời bằng kiến thức của bạn. ' +
+        'TUYỆT ĐỐI KHÔNG in lại thẻ <web_search_results> hay toàn bộ nội dung thô ở trên ra câu trả lời.',
       sources: results.map((r) => ({
         title: r.title ?? r.url ?? '',
         url: r.url ?? '',

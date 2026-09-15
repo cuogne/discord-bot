@@ -12,16 +12,17 @@ export async function generateContentStreamWithFallback(
   selectedModel?: string,
   tavily?: TavilyWebContext,
 ): Promise<StreamResult> {
-  const text = `${GEMINI_SYSTEM_PROMPT}\n\n${contents}`;
+  const systemInstruction = tavily
+    ? `${GEMINI_SYSTEM_PROMPT}\n\n${tavily.contextBlock}`
+    : GEMINI_SYSTEM_PROMPT;
 
   // If there's an attachment, we need to send it as inline data along with the text.
   // For text files, include the file name so the model knows the context.
   const attachmentLabel =
     attachment && attachment.kind === 'text' ? `\n\n[Attached file: ${attachment.name}]` : '';
-  const webSearchBlock = tavily ? `\n\n${tavily.contextBlock}` : '';
   const requestContents: string | Part[] = attachment
     ? [
-        { text: `${text}${attachmentLabel}${webSearchBlock}` },
+        { text: `${contents}${attachmentLabel}` },
         {
           inlineData: {
             mimeType: attachment.mimeType,
@@ -29,13 +30,16 @@ export async function generateContentStreamWithFallback(
           },
         },
       ]
-    : `${text}${webSearchBlock}`;
+    : contents;
 
   const { result: responseStream, model } = await generateWithModelFallback(
     (modelId) =>
       ai.models.generateContentStream({
         model: modelId,
         contents: requestContents,
+        config: {
+          systemInstruction,
+        },
       }),
     selectedModel,
   );
