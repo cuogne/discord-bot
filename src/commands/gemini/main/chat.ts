@@ -6,6 +6,7 @@ import { formatResponseTime } from '../../../utils/format.ts';
 import { isGeminiConfigured } from '../../../core/gemini/config.ts';
 import { getGeminiClient } from '../../../core/gemini/client.ts';
 import { generateContentStreamWithFallback } from './client.ts';
+import { getWebContext } from '../search/tavily.ts';
 import { handleCooldown, markCooldown } from '../utils/cooldown.ts';
 import { downloadGeminiAttachment } from '../utils/attachment.ts';
 import { buildAttachmentPreview } from '../utils/embed.ts';
@@ -38,9 +39,10 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
     await interaction.deferReply();
 
     const startedAt = Date.now(); // start to measure response time
-    const attachment = selectedAttachment
-      ? await downloadGeminiAttachment(selectedAttachment)
-      : undefined;
+    const [attachment, tavily] = await Promise.all([
+      selectedAttachment ? downloadGeminiAttachment(selectedAttachment) : undefined,
+      getWebContext(prompt),
+    ]);
 
     if (attachment) {
       // send a preview of the attachment to the user
@@ -55,6 +57,7 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
       prompt,
       attachment,
       selectedModel,
+      tavily,
     );
 
     const replier = new StreamReplier(interaction);
@@ -79,6 +82,14 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
       return;
     }
 
+    // if ((tavily?.sources.length ?? 0) > 0) {
+    //   const links = (tavily?.sources ?? [])
+    //     .slice(0, 5)
+    //     .map((source) => `[${source.title}](${source.url})`)
+    //     .join(' • ');
+    //   await replier.append(`\n\n🔗 Nguồn tham khảo: ${links}`);
+    // }
+
     await replier.finish();
 
     // end to measure response time
@@ -90,11 +101,14 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
     });
 
     // log of gemini
+    const channel = interaction.channel;
     logger.info(
       {
         userId: interaction.user.id,
         user: interaction.user.username,
         guildId: interaction.guildId ?? 'DM',
+        channelId: interaction.channelId,
+        channel: channel && 'name' in channel ? channel.name : undefined,
         options: {
           prompt,
           attachment: attachment
@@ -110,6 +124,13 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
         responseTime,
         tokensInput,
         tokensOutput,
+        tavily: tavily
+          ? {
+              resultCount: tavily.resultCount,
+              searchTimeSeconds: tavily.searchTimeSeconds,
+              sources: tavily.sources.length,
+            }
+          : undefined,
       },
       'gemini response',
     );
