@@ -1,8 +1,7 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { TOURNAMENTS } from '../data/tournaments.ts';
-import { EspnApiError, espnFetch, getCompetitor } from '../utils/espn.ts';
-import type { EspnScoreboard } from '../types/types.ts';
+import { fetchUpcomingScoreboards, getCompetitor } from '../utils/espn.ts';
 import {
   FOOTBALL_EMBED_COLOR,
   addDays,
@@ -20,14 +19,20 @@ export async function handleFootballTournament(interaction: ChatInputCommandInte
 
   try {
     const today = new Date();
-    const dates = `${toEspnDate(today)}-${toEspnDate(addDays(today, 13))}`; // 2 weeks
+    /*
+      espn api with date range param does not work, check issue: https://github.com/pseudo-r/Public-ESPN-API/issues/23
+    */
+    // const dates = `${toEspnDate(today)}-${toEspnDate(addDays(today, 13))}`; // 2 weeks
 
-    const data = await espnFetch<EspnScoreboard>(
-      `https://site.api.espn.com/apis/site/v2/sports/soccer/${tournamentId}/scoreboard?dates=${dates}`,
-    );
+    // const data = await espnFetch<EspnScoreboard>(
+    //   `https://site.api.espn.com/apis/site/v2/sports/soccer/${tournamentId}/scoreboard?dates=${dates}`,
+    // );
+
+    const dates = Array.from({ length: 14 }, (_, index) => toEspnDate(addDays(today, index)));
+    const results = await fetchUpcomingScoreboards(tournamentId, dates);
 
     const matchesByDate = new Map<string, string[]>();
-    for (const event of data.events ?? []) {
+    for (const { event } of results) {
       const home = getCompetitor(event, 'home')?.team.displayName;
       const away = getCompetitor(event, 'away')?.team.displayName;
       if (!home || !away) continue;
@@ -68,7 +73,6 @@ export async function handleFootballTournament(interaction: ChatInputCommandInte
       {
         err,
         tournamentId,
-        status: err instanceof EspnApiError ? err.status : undefined,
       },
       'Lỗi khi lấy lịch thi đấu giải đấu',
     );
