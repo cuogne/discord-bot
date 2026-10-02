@@ -28,6 +28,7 @@ const command: SlashCommand = {
               { name: '🇫🇷 Ligue 1', value: 'fra.1' },
               { name: '🇪🇺 UEFA Champions League', value: 'uefa.champions' },
               { name: '🇪🇺 UEFA Europa League', value: 'uefa.europa' },
+              { name: '🇪🇺 UEFA Nations League', value: 'uefa.nations' },
               { name: '🌎 FIFA World Cup 2026', value: 'fifa.world' },
             ),
         ),
