@@ -4,16 +4,12 @@ import type {
   EspnCompetitor,
   EspnScoreboard,
   TournamentEventResult,
+  ScoreboardResult,
 } from '../types/types.ts';
 import { toEspnDate } from './format.ts';
 import { espnFetch } from './espn-client.ts';
 
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
-
-interface ScoreboardResult {
-  tournamentId: string;
-  board: EspnScoreboard;
-}
 
 function buildScoreboardUrl(tournamentId: string, dates: string): string {
   return `${ESPN_SCOREBOARD_BASE}/${tournamentId}/scoreboard?dates=${dates}`;
@@ -24,7 +20,10 @@ function buildScoreboardUrl(tournamentId: string, dates: string): string {
 async function fetchBoard(tournamentId: string, dates: string): Promise<ScoreboardResult | null> {
   try {
     const board = await espnFetch<EspnScoreboard>(buildScoreboardUrl(tournamentId, dates));
-    return { tournamentId, board };
+    return {
+      tournamentId,
+      board,
+    };
   } catch (error) {
     logger.warn(
       {
@@ -125,7 +124,10 @@ export async function fetchUpcomingScoreboards(
   const boards = await fetchScoreboardsForMonths(tournamentId, months);
 
   return collectEvents(
-    boards.map((board) => ({ tournamentId, board })),
+    boards.map((board) => ({
+      tournamentId,
+      board,
+    })),
     (event) => wanted.has(toEspnDate(new Date(event.date))),
   );
 }

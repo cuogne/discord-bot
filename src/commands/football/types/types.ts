@@ -34,3 +34,8 @@ export interface TournamentEventResult {
   tournamentId: string;
   event: EspnEvent;
 }
+
+export interface ScoreboardResult {
+  tournamentId: string;
+  board: EspnScoreboard;
+}
