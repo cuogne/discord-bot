@@ -23,7 +23,7 @@ export async function handleCoinDice(interaction: ChatInputCommandInteraction): 
 
   const rolled = Math.floor(Math.random() * 6) + 1; // random number between 1 and 6 (dice roll)
   const won = rolled === guess; // check if the user guessed correctly
-  const balanceChange = won ? coin * 3 : -coin; // calculate the balance change based on the result of the dice roll
+  const balanceChange = won ? coin * 4 : -coin; // calculate the balance change based on the result of the dice roll
 
   const gameResult = await applyGameResult({
     userId: interaction.user.id,
@@ -72,7 +72,7 @@ export async function handleCoinDice(interaction: ChatInputCommandInteraction): 
         )
         .setDescription(
           won
-            ? `# ${diceEmoji}\n**+${formatCoins(balanceChange)} 🪙** (x3 tiền cược).\n\n${balanceText(user)}`
+            ? `# ${diceEmoji}\n**+${formatCoins(balanceChange)} 🪙** (x4 tiền cược).\n\n${balanceText(user)}`
             : `# ${diceEmoji}\n**-${formatCoins(coin)} 🪙**.\n\n${balanceText(user)}`,
         ),
     ],

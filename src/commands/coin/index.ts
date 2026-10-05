@@ -23,7 +23,7 @@ const command: SlashCommand = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName('flip')
-        .setDescription('Tung đồng xu: mặt ngửa thắng, mặt sấp thua (x2 tiền cược)')
+        .setDescription('Tung đồng xu: mặt ngửa thắng, mặt sấp thua')
         .addIntegerOption((option) =>
           option
             .setName('amount')
@@ -36,7 +36,7 @@ const command: SlashCommand = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName('dice')
-        .setDescription('Đoán số xúc xắc, đúng nhận x3 tiền cược')
+        .setDescription('Đoán số xúc xắc, đúng nhận x4 tiền cược')
         .addIntegerOption((option) =>
           option
             .setName('guess')
@@ -70,7 +70,7 @@ const command: SlashCommand = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName('baucua')
-        .setDescription('Đặt bầu cua: 1 con x1, 2 con x3, 3 con x5')
+        .setDescription('Đặt bầu cua: trúng 1 con x1, 2 con x2, 3 con x5')
         .addStringOption((option) =>
           option
             .setName('symbol')

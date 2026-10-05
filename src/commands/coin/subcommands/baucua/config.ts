@@ -14,7 +14,7 @@ export interface BauCuaConfig {
 }
 
 // Single source of truth for faces and dice count.
-// Payout: profit equals stake times the number of matching dice.
+// Payout: profit multiplier by matching dice, see BAUCUA_PAYOUT_MULTIPLIER.
 export const BAUCUA_CONFIG: BauCuaConfig = {
   diceCount: 3,
   symbols: [
@@ -34,6 +34,6 @@ export const BAUCUA_SYMBOL_BY_KEY: Record<BauCuaSymbolKey, BauCuaSymbol> = Objec
 /** Profit multiplier by number of matching dice. */
 export const BAUCUA_PAYOUT_MULTIPLIER: Readonly<Record<number, number>> = {
   1: 1,
-  2: 3,
+  2: 2,
   3: 5,
 };
