@@ -2,6 +2,7 @@ import { MessageFlags, SlashCommandBuilder, type ChatInputCommandInteraction } f
 import type { SlashCommand } from '../../types/command.ts';
 import { MAX_COIN } from './config.ts';
 import { tryStartCoinCooldown } from './cooldown.ts';
+import { handleCoinCash } from './subcommands/cash.ts';
 import { handleCoinDaily } from './subcommands/daily.ts';
 import { handleCoinDice } from './subcommands/dice.ts';
 import { handleCoinFlip } from './subcommands/flip.ts';
@@ -21,7 +22,7 @@ const command: SlashCommand = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName('flip')
-        .setDescription('Tung đồng xu: mặt ngửa thắng, mặt sấp thua')
+        .setDescription('Tung đồng xu: mặt ngửa thắng, mặt sấp thua (x2 tiền cược)')
         .addIntegerOption((option) =>
           option
             .setName('amount')
@@ -67,21 +68,33 @@ const command: SlashCommand = {
     )
     .addSubcommand((subcommand) =>
       subcommand
+        .setName('cash')
+        .setDescription('Xem số dư coin hiện tại'),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
         .setName('info')
         .setDescription('Xem số dư và thống kê coin của bạn'),
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
-    const remainingMs = tryStartCoinCooldown(interaction.user.id);
-    if (remainingMs > 0) {
-      await interaction.reply({
-        content: `Bạn chờ **${Math.ceil(remainingMs / 1000)} giây** rồi dùng /coin tiếp nha.`,
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
+    const subcommand = interaction.options.getSubcommand();
+
+    // Read-only lookup: never consume the game cooldown.
+    if (subcommand !== 'cash') {
+      const remainingMs = tryStartCoinCooldown(interaction.user.id);
+      if (remainingMs > 0) {
+        await interaction.reply({
+          content: `Bạn chờ **${Math.ceil(remainingMs / 1000)} giây** rồi dùng /coin tiếp nha.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
     }
 
-    switch (interaction.options.getSubcommand()) {
+    switch (subcommand) {
+      case 'cash':
+        return handleCoinCash(interaction);
       case 'daily':
         return handleCoinDaily(interaction);
       case 'flip':

@@ -47,7 +47,7 @@ export async function handleCoinDaily(interaction: ChatInputCommandInteraction):
             (streakBonus > 0
               ? ` (gồm ${formatCoins(DAILY_REWARD)} daily + ${formatCoins(streakBonus)} thưởng streak 🔥).`
               : '.') +
-            `\n${balanceText(result.user)}
+            `\n\n${balanceText(result.user)}
           \n🔥 Streak: ${result.user.dailyStreak} ngày`,
         ),
       // .addFields({
