@@ -29,6 +29,7 @@ export async function handleCoinInfo(interaction: ChatInputCommandInteraction): 
           { name: '\n', value: '\n' },
           { name: '🪙 Flip', value: statsText(user.flip), inline: true },
           { name: '🎲 Dice', value: statsText(user.dice), inline: true },
+          { name: '🦀 Bầu Cua', value: statsText(user.baucua), inline: true },
           { name: '\n', value: '\n' },
           { name: '🎰 Jackpot', value: jackpotStatsText(user.jackpot, user.jackpotHits) },
         ),

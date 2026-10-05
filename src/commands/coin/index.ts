@@ -2,6 +2,7 @@ import { MessageFlags, SlashCommandBuilder, type ChatInputCommandInteraction } f
 import type { SlashCommand } from '../../types/command.ts';
 import { MAX_COIN } from './config.ts';
 import { tryStartCoinCooldown } from './cooldown.ts';
+import { handleCoinBauCua } from './subcommands/baucua/index.ts';
 import { handleCoinCash } from './subcommands/cash.ts';
 import { handleCoinDaily } from './subcommands/daily.ts';
 import { handleCoinDice } from './subcommands/dice.ts';
@@ -68,6 +69,33 @@ const command: SlashCommand = {
     )
     .addSubcommand((subcommand) =>
       subcommand
+        .setName('baucua')
+        .setDescription('Đặt bầu cua: 1 con x1, 2 con x3, 3 con x5')
+        .addStringOption((option) =>
+          option
+            .setName('symbol')
+            .setDescription('Con bạn đặt')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Bầu 🍐', value: 'bau' },
+              { name: 'Cua 🦀', value: 'cua' },
+              { name: 'Tôm 🦐', value: 'tom' },
+              { name: 'Cá 🐟', value: 'ca' },
+              { name: 'Gà 🐔', value: 'ga' },
+              { name: 'Nai 🦌', value: 'nai' },
+            ),
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName('amount')
+            .setDescription('Số coin muốn cược')
+            .setMinValue(1)
+            .setMaxValue(MAX_COIN)
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
         .setName('cash')
         .setDescription('Xem số dư coin hiện tại'),
     )
@@ -105,6 +133,8 @@ const command: SlashCommand = {
         return handleCoinJackpot(interaction);
       case 'info':
         return handleCoinInfo(interaction);
+      case 'baucua':
+        return handleCoinBauCua(interaction);
     }
   },
 };

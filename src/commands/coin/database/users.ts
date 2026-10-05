@@ -54,6 +54,7 @@ async function ensureCoinUser(userId: string): Promise<void> {
         dice: { ...EMPTY_STATS },
         jackpot: { ...EMPTY_STATS },
         jackpotHits: { ...EMPTY_JACKPOT_HITS },
+        baucua: { ...EMPTY_STATS },
       },
     },
     { upsert: true, setDefaultsOnInsert: true },
@@ -66,6 +67,12 @@ async function ensureCoinUser(userId: string): Promise<void> {
   await model.updateOne(
     { userId, jackpotHits: { $exists: false } },
     { $set: { jackpotHits: { ...EMPTY_JACKPOT_HITS } } },
+  );
+
+  // Backfill baucua stats for users created before the game existed.
+  await model.updateOne(
+    { userId, baucua: { $exists: false } },
+    { $set: { baucua: { ...EMPTY_STATS } } },
   );
 }
 
@@ -80,6 +87,7 @@ export async function getCoinUser(userId: string): Promise<CoinUser> {
   return {
     ...user,
     jackpotHits: { ...EMPTY_JACKPOT_HITS, ...(user.jackpotHits ?? {}) },
+    baucua: { ...EMPTY_STATS, ...(user.baucua ?? {}) },
   };
 }
 
@@ -184,6 +192,7 @@ export async function applyGameResult(params: {
           user: {
             ...user,
             jackpotHits: { ...EMPTY_JACKPOT_HITS, ...(user.jackpotHits ?? {}) },
+            baucua: { ...EMPTY_STATS, ...(user.baucua ?? {}) },
           },
           balanceChange: params.balanceChange,
         }
@@ -227,6 +236,7 @@ export async function applyGameResult(params: {
         user: {
           ...user,
           jackpotHits: { ...EMPTY_JACKPOT_HITS, ...(user.jackpotHits ?? {}) },
+          baucua: { ...EMPTY_STATS, ...(user.baucua ?? {}) },
         },
         balanceChange: actualBalanceChange,
       };

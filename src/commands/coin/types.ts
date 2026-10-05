@@ -1,4 +1,4 @@
-export type CoinGame = 'flip' | 'dice' | 'jackpot';
+export type CoinGame = 'flip' | 'dice' | 'jackpot' | 'baucua';
 
 export interface CoinGameStats {
   wins: number;
@@ -17,6 +17,7 @@ export interface CoinUser {
   dice: CoinGameStats;
   jackpot: CoinGameStats;
   jackpotHits: JackpotHits;
+  baucua: CoinGameStats;
   createdAt: Date;
   updatedAt: Date;
 }

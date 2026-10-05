@@ -36,6 +36,7 @@ export const coinUserSchema = new Schema<CoinUser>(
     dice: { type: gameStatsSchema, default: () => ({}) },
     jackpot: { type: gameStatsSchema, default: () => ({}) },
     jackpotHits: { type: jackpotHitsSchema, default: () => ({}) },
+    baucua: { type: gameStatsSchema, default: () => ({}) },
   },
   {
     collection: 'coinUsers',
