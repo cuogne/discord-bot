@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { FLIP_TOSS_DELAY_MS } from '../config.ts';
-import { applyGameResult } from '../database/users.ts';
+import { applyGameResult, getCoinUser } from '../database/users.ts';
 import { balanceText, formatCoins } from '../utils/format.ts';
 import { replyInsufficientBalance } from '../utils/reply.ts';
 import { logger } from '../../../logging/logger.ts';
@@ -14,6 +14,13 @@ export async function handleCoinFlip(interaction: ChatInputCommandInteraction): 
   // money never moves without a result being shown.
   const won = Math.random() < 0.5;
   const balanceChange = won ? coin : -coin;
+
+  // Fast-fail before the animation; the settle below stays the source of
+  // truth in case the balance changes mid-spin.
+  if ((await getCoinUser(interaction.user.id)).balance < coin) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
 
   try {
     await interaction.editReply({

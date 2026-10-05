@@ -1,7 +1,7 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { BAUCUA_ROLL_DELAY_MS } from '../../config.ts';
-import { applyGameResult } from '../../database/users.ts';
+import { applyGameResult, getCoinUser } from '../../database/users.ts';
 import { balanceText, formatCoins } from '../../utils/format.ts';
 import { replyInsufficientBalance } from '../../utils/reply.ts';
 import { logger } from '../../../../logging/logger.ts';
@@ -25,6 +25,13 @@ export async function handleCoinBauCua(interaction: ChatInputCommandInteraction)
   }
 
   await interaction.deferReply();
+
+  // Fast-fail before the animation; the settle below stays the source of
+  // truth in case the balance changes mid-spin.
+  if ((await getCoinUser(interaction.user.id)).balance < coin) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
 
   const result = rollBauCua(guess);
   const balanceChange = result.won ? coin * result.multiplier : -coin;

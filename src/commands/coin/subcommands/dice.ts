@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { DICE_ROLL_DELAY_MS } from '../config.ts';
-import { applyGameResult } from '../database/users.ts';
+import { applyGameResult, getCoinUser } from '../database/users.ts';
 import { balanceText, formatCoins } from '../utils/format.ts';
 import { replyInsufficientBalance } from '../utils/reply.ts';
 import { logger } from '../../../logging/logger.ts';
@@ -26,6 +26,13 @@ export async function handleCoinDice(interaction: ChatInputCommandInteraction): 
   const rolled = Math.floor(Math.random() * 6) + 1; // random number between 1 and 6 (dice roll)
   const won = rolled === guess; // check if the user guessed correctly
   const balanceChange = won ? coin * 4 : -coin; // calculate the balance change based on the result of the dice roll
+
+  // Fast-fail before the animation; the settle below stays the source of
+  // truth in case the balance changes mid-roll.
+  if ((await getCoinUser(interaction.user.id)).balance < coin) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
 
   try {
     await interaction.editReply({

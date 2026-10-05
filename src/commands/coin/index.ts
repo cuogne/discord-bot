@@ -2,7 +2,6 @@ import { MessageFlags, SlashCommandBuilder, type ChatInputCommandInteraction } f
 import type { SlashCommand } from '../../types/command.ts';
 import { MAX_COIN } from './config.ts';
 import { tryStartCoinCooldown } from './cooldown.ts';
-import { tryClaimInteraction } from './database/claims.ts';
 import { handleCoinBauCua } from './subcommands/baucua/index.ts';
 import { handleCoinCash } from './subcommands/cash.ts';
 import { handleCoinDaily } from './subcommands/daily.ts';
@@ -119,14 +118,6 @@ const command: SlashCommand = {
   async execute(interaction: ChatInputCommandInteraction) {
     inFlightCoinCommands += 1;
     try {
-      // The same interaction id is claimed exactly once in Mongo, so a
-      // redelivered interaction can never settle money twice or replay a
-      // stale animation over an already-shown result, even across bot
-      // restarts or overlapping instances.
-      if (!(await tryClaimInteraction(interaction.id))) {
-        return;
-      }
-
       const subcommand = interaction.options.getSubcommand();
 
       // Read-only lookup: never consume the game cooldown.

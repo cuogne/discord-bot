@@ -13,6 +13,14 @@ export async function handleCoinJackpot(interaction: ChatInputCommandInteraction
   // need settled numbers, so they use a read-only preview of the user.
   const result = rollJackpot();
   const previewUser = await getCoinUser(interaction.user.id);
+
+  // Fast-fail before the animation; the settle below stays the source of
+  // truth in case the balance changes mid-spin.
+  if (previewUser.balance < coin) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
+
   await revealSlots(interaction, {
     result,
     user: previewUser,
