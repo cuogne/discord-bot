@@ -21,23 +21,11 @@ export async function handleCoinDice(interaction: ChatInputCommandInteraction): 
 
   await interaction.deferReply();
 
+  // Roll first, settle after the animation: if the process dies mid-roll,
+  // money never moves without a result being shown.
   const rolled = Math.floor(Math.random() * 6) + 1; // random number between 1 and 6 (dice roll)
   const won = rolled === guess; // check if the user guessed correctly
   const balanceChange = won ? coin * 4 : -coin; // calculate the balance change based on the result of the dice roll
-
-  const gameResult = await applyGameResult({
-    userId: interaction.user.id,
-    game: 'dice',
-    coin,
-    balanceChange,
-    won,
-  });
-
-  if (!gameResult) {
-    await replyInsufficientBalance(interaction, coin);
-    return;
-  }
-  const { user } = gameResult;
 
   try {
     await interaction.editReply({
@@ -60,6 +48,20 @@ export async function handleCoinDice(interaction: ChatInputCommandInteraction): 
   }
 
   const diceEmoji = DICE_NUMBER_EMOJI[rolled] ?? '🎲';
+
+  const gameResult = await applyGameResult({
+    userId: interaction.user.id,
+    game: 'dice',
+    coin,
+    balanceChange,
+    won,
+  });
+
+  if (!gameResult) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
+  const { user } = gameResult;
 
   const finalReply = {
     embeds: [

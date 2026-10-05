@@ -2,6 +2,7 @@ import { MessageFlags, SlashCommandBuilder, type ChatInputCommandInteraction } f
 import type { SlashCommand } from '../../types/command.ts';
 import { MAX_COIN } from './config.ts';
 import { tryStartCoinCooldown } from './cooldown.ts';
+import { tryClaimInteraction } from './database/claims.ts';
 import { handleCoinBauCua } from './subcommands/baucua/index.ts';
 import { handleCoinCash } from './subcommands/cash.ts';
 import { handleCoinDaily } from './subcommands/daily.ts';
@@ -9,6 +10,16 @@ import { handleCoinDice } from './subcommands/dice.ts';
 import { handleCoinFlip } from './subcommands/flip.ts';
 import { handleCoinInfo } from './subcommands/info.ts';
 import { handleCoinJackpot } from './subcommands/jackpot/index.ts';
+
+let inFlightCoinCommands = 0;
+const DRAIN_POLL_MS = 100;
+
+export async function waitForCoinCommandsToFinish(timeoutMs: number): Promise<void> {
+  const start = Date.now();
+  while (inFlightCoinCommands > 0 && Date.now() - start < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, DRAIN_POLL_MS));
+  }
+}
 
 const command: SlashCommand = {
   // prettier-ignore
@@ -106,35 +117,48 @@ const command: SlashCommand = {
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
-    const subcommand = interaction.options.getSubcommand();
-
-    // Read-only lookup: never consume the game cooldown.
-    if (subcommand !== 'cash') {
-      const remainingMs = tryStartCoinCooldown(interaction.user.id);
-      if (remainingMs > 0) {
-        await interaction.reply({
-          content: `Bạn chờ **${Math.ceil(remainingMs / 1000)} giây** rồi dùng /coin tiếp nha.`,
-          flags: MessageFlags.Ephemeral,
-        });
+    inFlightCoinCommands += 1;
+    try {
+      // The same interaction id is claimed exactly once in Mongo, so a
+      // redelivered interaction can never settle money twice or replay a
+      // stale animation over an already-shown result, even across bot
+      // restarts or overlapping instances.
+      if (!(await tryClaimInteraction(interaction.id))) {
         return;
       }
-    }
 
-    switch (subcommand) {
-      case 'cash':
-        return handleCoinCash(interaction);
-      case 'daily':
-        return handleCoinDaily(interaction);
-      case 'flip':
-        return handleCoinFlip(interaction);
-      case 'dice':
-        return handleCoinDice(interaction);
-      case 'jackpot':
-        return handleCoinJackpot(interaction);
-      case 'info':
-        return handleCoinInfo(interaction);
-      case 'baucua':
-        return handleCoinBauCua(interaction);
+      const subcommand = interaction.options.getSubcommand();
+
+      // Read-only lookup: never consume the game cooldown.
+      if (subcommand !== 'cash' && subcommand !== 'info') {
+        const remainingMs = tryStartCoinCooldown(interaction.user.id);
+        if (remainingMs > 0) {
+          await interaction.reply({
+            content: `Bạn chờ **${Math.ceil(remainingMs / 1000)} giây** rồi dùng /coin tiếp nha.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+      }
+
+      switch (subcommand) {
+        case 'cash':
+          return handleCoinCash(interaction);
+        case 'daily':
+          return handleCoinDaily(interaction);
+        case 'flip':
+          return handleCoinFlip(interaction);
+        case 'dice':
+          return handleCoinDice(interaction);
+        case 'jackpot':
+          return handleCoinJackpot(interaction);
+        case 'info':
+          return handleCoinInfo(interaction);
+        case 'baucua':
+          return handleCoinBauCua(interaction);
+      }
+    } finally {
+      inFlightCoinCommands -= 1;
     }
   },
 };

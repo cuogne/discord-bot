@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { connectDatabases, disconnectDatabases } from './core/database/index.ts';
 import { initBanManager } from './core/ban/index.ts';
 import { loadCommands } from './commands/index.ts';
+import { waitForCoinCommandsToFinish } from './commands/coin/index.ts';
 import { registerEvents } from './events/registerEvents.ts';
 import { handleStartupFailure, registerProcessLifecycle } from './events/lifecycle.ts';
 import { stopCron } from './commands/hcmus-news/main/scheduler.ts';
@@ -18,6 +19,8 @@ async function main() {
 
   registerProcessLifecycle(async () => {
     stopCron();
+    client.destroy();
+    await waitForCoinCommandsToFinish(7_000);
     await disconnectDatabases();
   });
 

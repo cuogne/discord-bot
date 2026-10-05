@@ -10,7 +10,7 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function revealSlots(
+export async function revealSlots(
   interaction: ChatInputCommandInteraction,
   round: JackpotRound,
 ): Promise<void> {
@@ -35,7 +35,7 @@ async function revealSlots(
   }
 }
 
-async function showFinalResult(
+export async function showFinalResult(
   interaction: ChatInputCommandInteraction,
   round: JackpotRound,
 ): Promise<void> {
@@ -67,12 +67,4 @@ async function showFinalResult(
   await interaction.followUp({
     embeds: [embed],
   });
-}
-
-export async function animateJackpot(
-  interaction: ChatInputCommandInteraction,
-  round: JackpotRound,
-): Promise<void> {
-  await revealSlots(interaction, round);
-  await showFinalResult(interaction, round);
 }

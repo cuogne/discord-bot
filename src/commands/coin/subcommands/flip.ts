@@ -10,23 +10,10 @@ export async function handleCoinFlip(interaction: ChatInputCommandInteraction): 
   const coin = interaction.options.getInteger('amount', true);
   await interaction.deferReply();
 
-  // logic for coin flip game
+  // Roll first, settle after the animation: if the process dies mid-spin,
+  // money never moves without a result being shown.
   const won = Math.random() < 0.5;
   const balanceChange = won ? coin : -coin;
-
-  const gameResult = await applyGameResult({
-    userId: interaction.user.id,
-    game: 'flip',
-    coin,
-    balanceChange,
-    won,
-  });
-
-  if (!gameResult) {
-    await replyInsufficientBalance(interaction, coin);
-    return;
-  }
-  const { user } = gameResult;
 
   try {
     await interaction.editReply({
@@ -47,6 +34,20 @@ export async function handleCoinFlip(interaction: ChatInputCommandInteraction): 
       'Failed to show coin flip animation',
     );
   }
+
+  const gameResult = await applyGameResult({
+    userId: interaction.user.id,
+    game: 'flip',
+    coin,
+    balanceChange,
+    won,
+  });
+
+  if (!gameResult) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
+  const { user } = gameResult;
 
   const resultText = won
     ? `Bạn thắng **+${formatCoins(coin)} 🪙**.`

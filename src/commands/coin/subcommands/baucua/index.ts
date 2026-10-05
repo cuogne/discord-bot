@@ -29,20 +29,6 @@ export async function handleCoinBauCua(interaction: ChatInputCommandInteraction)
   const result = rollBauCua(guess);
   const balanceChange = result.won ? coin * result.multiplier : -coin;
 
-  const gameResult = await applyGameResult({
-    userId: interaction.user.id,
-    game: 'baucua',
-    coin,
-    balanceChange,
-    won: result.won,
-  });
-
-  if (!gameResult) {
-    await replyInsufficientBalance(interaction, coin);
-    return;
-  }
-  const { user } = gameResult;
-
   try {
     await interaction.editReply({
       embeds: [
@@ -64,6 +50,20 @@ export async function handleCoinBauCua(interaction: ChatInputCommandInteraction)
   }
 
   const faces = result.faces.map((face) => BAUCUA_SYMBOL_BY_KEY[face]!.emoji).join('  │  ');
+
+  const gameResult = await applyGameResult({
+    userId: interaction.user.id,
+    game: 'baucua',
+    coin,
+    balanceChange,
+    won: result.won,
+  });
+
+  if (!gameResult) {
+    await replyInsufficientBalance(interaction, coin);
+    return;
+  }
+  const { user } = gameResult;
 
   const finalReply = {
     embeds: [
