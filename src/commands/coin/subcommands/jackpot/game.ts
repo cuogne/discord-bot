@@ -3,11 +3,12 @@ import type { JackpotHitKey } from '../../types.ts';
 import {
   HIT_KEY_BY_SYMBOL,
   JACKPOT_CONFIG,
-  type JackpotConfig,
   type JackpotPrize,
+  type MissPatternChance,
   type SlotSymbol,
   type SlotSymbols,
 } from './config.ts';
+import { JACKPOT_MISS_PATTERN_WEIGHTS, JACKPOT_PRIZE_WEIGHTS } from './weights.ts';
 
 type RandomInteger = (maxExclusive: number) => number;
 
@@ -17,77 +18,73 @@ export interface JackpotResult {
   won: boolean;
 }
 
-// Fail fast on misconfiguration instead of silently paying wrong odds.
-function resolvePrizeWeights(config: JackpotConfig): ReadonlyArray<number> {
-  const weights = config.prizes.map((prize) => prize.chancePercent * 10);
-  if (
-    weights.some((weight) => !Number.isSafeInteger(weight) || weight < 0) ||
-    weights.reduce((sum, weight) => sum + weight, 0) !== config.rollRange
-  ) {
-    throw new Error('Jackpot chances must be non-negative multiples of 0.1% totaling 100%');
-  }
-
-  for (const prize of config.prizes) {
-    if (prize.kind === 'match' && !config.symbols.includes(prize.symbol)) {
-      throw new Error(`Jackpot prize symbol ${prize.symbol} is missing from config symbols`);
+function rollWeightedOption<T>(
+  random: RandomInteger,
+  options: ReadonlyArray<T>,
+  weights: ReadonlyArray<number>,
+): T {
+  // use cumulative subtraction.
+  let remaining = random(JACKPOT_CONFIG.rollRange);
+  for (const [index, option] of options.entries()) {
+    const weight = weights[index]!;
+    if (remaining < weight) {
+      return option;
     }
+    remaining -= weight;
   }
 
-  for (const symbol of config.symbols) {
-    if (!(symbol in HIT_KEY_BY_SYMBOL)) {
-      throw new Error(`Jackpot symbol ${symbol} is missing a hit-tracking key`);
-    }
-  }
-
-  return weights;
+  // if we reach here, the weights are misconfigured and don't sum to JACKPOT_CONFIG.rollRange
+  throw new Error('Jackpot roll did not match any configured option');
 }
 
-const JACKPOT_PRIZE_WEIGHTS: ReadonlyArray<number> = resolvePrizeWeights(JACKPOT_CONFIG);
-
-function prizeForRoll(roll: number): JackpotPrize {
-  let upperBound = 0;
-
-  for (let index = 0; index < JACKPOT_CONFIG.prizes.length; index += 1) {
-    upperBound += JACKPOT_PRIZE_WEIGHTS[index]!;
-    if (roll < upperBound) {
-      return JACKPOT_CONFIG.prizes[index]!;
-    }
-  }
-
-  throw new Error(`Invalid jackpot roll: ${roll}`);
+function rollPrize(random: RandomInteger): JackpotPrize {
+  return rollWeightedOption(random, JACKPOT_CONFIG.prizes, JACKPOT_PRIZE_WEIGHTS);
 }
 
-function rollMissSymbols(random: RandomInteger): SlotSymbols {
-  // Conditional on a miss: 23% AAB, 6% ABA, 6% BAA, 65% all distinct.
-  const patternRoll = random(100);
-  if (patternRoll < 35) {
-    const repeated = JACKPOT_CONFIG.symbols[random(JACKPOT_CONFIG.symbols.length)]!;
-    const differentSymbols = JACKPOT_CONFIG.symbols.filter((symbol) => symbol !== repeated);
-    const different = differentSymbols[random(differentSymbols.length)]!;
+function rollMissPattern(random: RandomInteger): MissPatternChance {
+  return rollWeightedOption(random, JACKPOT_CONFIG.missPatterns, JACKPOT_MISS_PATTERN_WEIGHTS);
+}
 
-    if (patternRoll < 23) {
-      return [repeated, repeated, different];
-    }
-    if (patternRoll < 29) {
-      return [repeated, different, repeated];
-    }
-    return [different, repeated, repeated];
-  }
-
-  const pool = [...JACKPOT_CONFIG.symbols];
+function rollThreeDifferentSymbols(random: RandomInteger): SlotSymbols {
+  const pool = [...JACKPOT_CONFIG.symbols]; // ['💩', '🍒', '🍊', '🍇', '⭐', '💎', '7️⃣' ]
   const selected: SlotSymbol[] = [];
 
   for (let i = 0; i < 3; i += 1) {
     const index = random(pool.length);
+
+    // get a random symbol and remove it from the pool to ensure uniqueness
     selected.push(pool.splice(index, 1)[0]!);
   }
 
   return selected as SlotSymbols;
 }
 
+function rollTwoMatchingSymbols(random: RandomInteger, differentIndex: 0 | 1 | 2): SlotSymbols {
+  // On a miss, choose both symbols uniformly. Prize odds do not apply here.
+  const repeated = JACKPOT_CONFIG.symbols[random(JACKPOT_CONFIG.symbols.length)]!;
+  const others = JACKPOT_CONFIG.symbols.filter((symbol) => symbol !== repeated);
+  const different = others[random(others.length)]!;
+  const symbols: SlotSymbols = [repeated, repeated, repeated];
+  symbols[differentIndex] = different;
+  return symbols;
+}
+
+function rollMissSymbols(random: RandomInteger): SlotSymbols {
+  const { pattern } = rollMissPattern(random);
+  switch (pattern) {
+    case 'ABA':
+      return rollTwoMatchingSymbols(random, 1);
+    case 'ABC':
+      return rollThreeDifferentSymbols(random);
+    case 'AAB':
+      return rollTwoMatchingSymbols(random, 2);
+    case 'ABB':
+      return rollTwoMatchingSymbols(random, 0);
+  }
+}
+
 export function rollJackpot(random: RandomInteger = randomInt): JackpotResult {
-  const roll = random(JACKPOT_CONFIG.rollRange);
-  const prize = prizeForRoll(roll);
+  const prize = rollPrize(random);
 
   // Misses never display three matching symbols.
   if (prize.kind === 'miss') {
@@ -98,6 +95,7 @@ export function rollJackpot(random: RandomInteger = randomInt): JackpotResult {
     };
   }
 
+  // kind === 'match' means the player won, so we display three matching symbols.
   return {
     symbols: [prize.symbol, prize.symbol, prize.symbol],
     multiplier: prize.multiplier,
