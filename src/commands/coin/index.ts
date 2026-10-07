@@ -51,8 +51,14 @@ const command: SlashCommand = {
           option
             .setName('guess')
             .setDescription('Số bạn đoán (1-6)')
-            .setMinValue(1)
-            .setMaxValue(6)
+            .addChoices(
+              { name: '1️⃣', value: 1 },
+              { name: '2️⃣', value: 2 },
+              { name: '3️⃣', value: 3 },
+              { name: '4️⃣', value: 4 },
+              { name: '5️⃣', value: 5 },
+              { name: '6️⃣', value: 6 },
+            )
             .setRequired(true),
         )
         .addIntegerOption((option) =>
