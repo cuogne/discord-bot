@@ -52,12 +52,12 @@ const command: SlashCommand = {
             .setName('guess')
             .setDescription('Số bạn đoán (1-6)')
             .addChoices(
-              { name: '1️⃣', value: 1 },
-              { name: '2️⃣', value: 2 },
-              { name: '3️⃣', value: 3 },
-              { name: '4️⃣', value: 4 },
-              { name: '5️⃣', value: 5 },
-              { name: '6️⃣', value: 6 },
+              { name: '1', value: 1 },
+              { name: '2', value: 2 },
+              { name: '3', value: 3 },
+              { name: '4', value: 4 },
+              { name: '5', value: 5 },
+              { name: '6', value: 6 },
             )
             .setRequired(true),
         )

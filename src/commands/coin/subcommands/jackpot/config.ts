@@ -23,9 +23,9 @@ export const JACKPOT_CONFIG: JackpotConfig = {
   rollRange: 1_000,
   prizes: [
     { chancePercent: 1.2, kind: 'match', symbol: '💩', multiplier: -2 },
-    { chancePercent: 56.8, kind: 'miss', multiplier: -1 },
+    { chancePercent: 58.8, kind: 'miss', multiplier: -1 },
     { chancePercent: 23.2, kind: 'match', symbol: '🍒', multiplier: 1 },
-    { chancePercent: 10, kind: 'match', symbol: '🍊', multiplier: 2 },
+    { chancePercent: 8, kind: 'match', symbol: '🍊', multiplier: 2 },
     { chancePercent: 5.2, kind: 'match', symbol: '🍇', multiplier: 3 },
     { chancePercent: 2.5, kind: 'match', symbol: '⭐', multiplier: 4 },
     { chancePercent: 0.8, kind: 'match', symbol: '💎', multiplier: 5 },

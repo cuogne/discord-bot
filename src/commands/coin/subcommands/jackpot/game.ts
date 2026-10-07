@@ -58,12 +58,20 @@ function prizeForRoll(roll: number): JackpotPrize {
 }
 
 function rollMissSymbols(random: RandomInteger): SlotSymbols {
-  // 40% of misses are near misses: the first two reels match, then the last
-  // reel differs. The other 60% show three distinct symbols.
-  if (random(10) < 4) {
-    const first = JACKPOT_CONFIG.symbols[random(JACKPOT_CONFIG.symbols.length)]!;
-    const others = JACKPOT_CONFIG.symbols.filter((symbol) => symbol !== first);
-    return [first, first, others[random(others.length)]!];
+  // Conditional on a miss: 23% AAB, 6% ABA, 6% BAA, 65% all distinct.
+  const patternRoll = random(100);
+  if (patternRoll < 35) {
+    const repeated = JACKPOT_CONFIG.symbols[random(JACKPOT_CONFIG.symbols.length)]!;
+    const differentSymbols = JACKPOT_CONFIG.symbols.filter((symbol) => symbol !== repeated);
+    const different = differentSymbols[random(differentSymbols.length)]!;
+
+    if (patternRoll < 23) {
+      return [repeated, repeated, different];
+    }
+    if (patternRoll < 29) {
+      return [repeated, different, repeated];
+    }
+    return [different, repeated, repeated];
   }
 
   const pool = [...JACKPOT_CONFIG.symbols];
