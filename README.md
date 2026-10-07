@@ -16,6 +16,13 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/calendar` | `month`, `year` | Hiển thị lịch của một tháng bất kỳ. | `/calendar month:8 year:2026` |
 | `/cinestar today` | `cinema` | Xem lịch chiếu phim hôm nay tại Cinestar. | `/cinestar today cinema:Cinestar Sinh Viên - TP.HCM` |
 | `/cinestar upcoming` | — | Xem danh sách phim sắp chiếu tại Cinestar. | `/cinestar upcoming` |
+| `/coin daily` | — | Điểm danh nhận xu hôm nay. | `/coin daily` |
+| `/coin cash` | — | Xem số dư xu hiện tại. | `/coin cash` |
+| `/coin dice` | `guess`, `amount` | Đoán số xúc xắc và đặt cược coin. | `/coin dice guess:6 amount:100` |
+| `/coin flip` | `amount` | Cược tung đồng xu. | `/coin flip amount:100` |
+| `/coin jackpot` | `amount` | Quay jackpot bằng coin. | `/coin jackpot amount:100` |
+| `/coin baucua` | `symbol`, `amount` | Đặt cược bầu cua. | `/coin baucua symbol:Cua amount:100` |
+| `/coin info` | — | Xem số dư và thống kê coin. | `/coin info` |
 | `/dictionary` | `text` | Tra từ điển tiếng Anh. | `/dictionary text:care` |
 | `/football club` | `club` | Xem lịch thi đấu của một câu lạc bộ. | `/football club club:Manchester United` |
 | `/football score` | — | Xem tỉ số các trận đấu gần đây. | `/football score` |
@@ -24,11 +31,12 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/gemini` | `prompt`, `attachment` | Chat với AI Gemini, tự phân loại và phân tích ảnh hoặc file PDF. | `/gemini prompt:Phân tích file này attachment:tài liệu.pdf` |
 | `/giaxang` | — | Xem giá xăng dầu hôm nay. | `/giaxang` |
 | `/hcmus-news` | `setup\|latest\|status\|remove` | Nhận thông báo tin tức HCMUS | [Hướng dẫn chi tiết tại đây](src/commands/hcmus-news/INSTRUCTION.md) |
-| `/help` | — | Hiển thị danh sách câu lệnh và hướng dẫn sử dụng bot. | `/help` |
+| `/help` | — | Hiển thị danh sách câu lệnh theo từng danh mục và hướng dẫn sử dụng bot. | `/help` |
 | `/image` | `cat` hoặc `dog` | Xem ảnh ngẫu nhiên về mèo hoặc chó. | `/image dog` |
 | `/omikuji` | — | Xem quẻ bói Omikuji Nhật Bản. | `/omikuji` |
 | `/ping` | — | Pong! | `/ping` |
 | `/pokemon` | `id` hoặc `name` | Tra cứu Pokémon theo ID, tên hoặc nhận một Pokémon ngẫu nhiên. | `/pokemon name:pikachu` |
+| `/qr` | `bank`, `account`, `amount`, `description`, `accountname` | Tạo mã QR chuyển khoản, có thể thêm số tiền, nội dung và tên chủ tài khoản. | `/qr bank:Vietcombank account:123456789 amount:50000` |
 | `/random` | `text` | Chọn ngẫu nhiên một mục trong danh sách phân cách bằng dấu phẩy. | `/random text:táo,cam,chuối` |
 | `/send` | `message` | Reply một tin nhắn bằng bot. | `/send message:Xin chào mọi người` |
 | `/today` | — | Hiển thị ngày giờ hiện tại theo dương lịch và âm lịch. | `/today` |

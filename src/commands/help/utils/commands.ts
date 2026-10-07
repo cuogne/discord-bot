@@ -1,50 +1,118 @@
-export const COMMAND_LIST: Record<string, string> = {
-  '/action <action> <user>':
-    'Tương tác hành động (ôm, hôn, tát, đấm, đá, xoa đầu, chọc, cắn) với người dùng được chọn.',
-  '/avatar <user | banner | server>':
-    'Xem avatar của người dùng, banner của người dùng, hoặc avatar của server.',
-  '/ban usebot <user> <time> [reason]':
-    'Cấm người dùng sử dụng bot trong khoảng thời gian nhất định hoặc vĩnh viễn.',
-  '/calendar <month> <year>':
-    'Hiển thị lịch của một tháng bất kỳ theo dương lịch.',
-  '/cinestar today [cinema]':
-    'Xem lịch chiếu phim hôm nay tại các cụm rạp Cinestar trên toàn quốc.',
-  '/cinestar upcoming':
-    'Xem danh sách các bộ phim sắp chiếu tại cụm rạp Cinestar.',
-  '/dictionary <text>':
-    'Tra cứu từ điển tiếng Anh (định nghĩa, phiên âm, từ đồng nghĩa/trái nghĩa).',
-  '/football club <club>':
-    'Xem lịch thi đấu bóng đá của một câu lạc bộ cụ thể.',
-  '/football score':
-    'Xem tỉ số các trận đấu bóng đá gần đây.',
-  '/football today':
-    'Xem lịch các trận đấu bóng đá diễn ra hôm nay và ngày mai.',
-  '/football tournament <tournament>':
-    'Xem lịch thi đấu bóng đá của các giải đấu hàng đầu châu Âu.',
-  '/gemini <prompt> [model] [attachment]':
-    'Chat với Google Gemini AI (hỗ trợ phân tích ảnh, tài liệu PDF, code/text).',
-  '/giaxang':
-    'Xem bảng giá xăng dầu hôm nay tại Việt Nam.',
-  '/hcmus-news latest <category> [number]':
-    'Xem tin tức mới nhất từ các website chính thức của HCMUS.',
-  '/hcmus-news <setup | status | remove>':
-    'Cấu hình kênh nhận thông báo tự động tin tức mới nhất từ HCMUS.',
-  '/help':
-    'Hiển thị thông tin cơ bản về bot và danh sách câu lệnh.',
-  '/image <cat | dog>':
-    'Gửi hình ảnh ngẫu nhiên về mèo hoặc chó đáng yêu.',
-  '/omikuji':
-    'Rút quẻ bói Omikuji Nhật Bản kèm lời khuyên theo chủ đề từ Gemini AI.',
-  '/ping':
-    'Kiểm tra độ trễ phản hồi (latency) và kết nối WebSocket của bot.',
-  '/pokemon [id | name]':
-    'Tra cứu thông tin Pokémon theo ID, tên hoặc bắt Pokémon ngẫu nhiên.',
-  '/random <text>':
-    'Chọn ngẫu nhiên một mục từ danh sách các lựa chọn (cách nhau bởi dấu phẩy).',
-  '/send <message>':
-    'Gửi tin nhắn vào channel hiện tại thông qua bot.',
-  '/today':
-    'Hiển thị ngày giờ hiện tại theo dương lịch, âm lịch, can chi và giờ hoàng đạo.',
-  '/unban usebot <user>':
-    'Gỡ cấm người dùng sử dụng bot.',
-};
+import type { HelpPage } from '../types/types.ts';
+
+export const HELP_PAGES: HelpPage[] = [
+  {
+    id: 'utilities',
+    title: 'Tiện ích hàng ngày',
+    description: 'Công cụ nhanh, xem ảnh, lịch, từ điển, giá xăng, qr, avatar, action.',
+    emoji: '🧰',
+    color: 0x3498db,
+    commands: [
+      { name: '/help', description: 'Mở danh mục trợ giúp và chọn nhóm lệnh.' },
+      { name: '/ping', description: 'Kiểm tra độ trễ của bot.' },
+      { name: '/today', description: 'Xem ngày dương, ngày âm và giờ hoàng đạo.' },
+      { name: '/calendar <month> <year>', description: 'Xem lịch của một tháng trong năm.' },
+      { name: '/dictionary <text>', description: 'Tra nghĩa và phiên âm từ tiếng Anh.' },
+      {
+        name: '/random <text>',
+        description: 'Chọn ngẫu nhiên từ danh sách cách nhau bằng dấu phẩy.',
+      },
+      { name: '/giaxang', description: 'Xem giá xăng dầu hiện tại.' },
+      {
+        name: '/qr <bank> <account> [amount] [description] [accountname]',
+        description: 'Tạo mã QR chuyển khoản VietQR.',
+      },
+      { name: '/send <message>', description: 'Gửi nội dung vào kênh hiện tại qua bot.' },
+      {
+        name: '/action <hành động> <user>',
+        description: 'Tương tác với một người dùng bằng ảnh động.',
+      },
+      { name: '/avatar user [user]', description: 'Xem ảnh đại diện người dùng.' },
+      { name: '/avatar banner [user]', description: 'Xem ảnh bìa người dùng nếu có.' },
+      { name: '/avatar server', description: 'Xem ảnh đại diện máy chủ.' },
+      { name: '/image <cat | dog>', description: 'Xem ảnh mèo hoặc chó ngẫu nhiên.' },
+      { name: '/pokemon [id] [name]', description: 'Tra cứu hoặc bắt Pokémon ngẫu nhiên.' },
+      { name: '/omikuji', description: 'Rút quẻ Omikuji và nhận lời nhắn từ AI.' },
+    ],
+  },
+  {
+    id: 'cinestar',
+    title: 'Lịch chiếu phim Cinestar',
+    description: 'Xem lịch chiếu phim trong ngày tại Cinestar.',
+    emoji: '🎬',
+    color: 0xe67e22,
+    commands: [
+      { name: '/cinestar today [cinema]', description: 'Xem suất chiếu hôm nay tại Cinestar.' },
+      { name: '/cinestar upcoming', description: 'Xem phim sắp chiếu tại Cinestar.' },
+    ],
+  },
+  {
+    id: 'football',
+    title: 'Lịch thi đấu bóng đá',
+    description: 'Lịch đấu và tỉ số các trận bóng đá của các giải đấu và CLB ở châu Âu.',
+    emoji: '⚽',
+    color: 0x2ecc71,
+    commands: [
+      { name: '/football today', description: 'Xem các trận đấu tối nay và rạng sáng mai.' },
+      { name: '/football score', description: 'Xem tỉ số các trận gần đây.' },
+      { name: '/football club <club>', description: 'Xem lịch thi đấu của câu lạc bộ.' },
+      { name: '/football tournament <tournament>', description: 'Xem lịch thi đấu của giải đấu.' },
+    ],
+  },
+  {
+    id: 'hcmus',
+    title: 'Tin tức HCMUS',
+    description: 'Tin mới và thông báo tin tức tự động từ HCMUS',
+    emoji: '📰',
+    color: 0x1abc9c,
+    commands: [
+      { name: '/hcmus-news latest <category> [number]', description: 'Xem tin HCMUS mới nhất.' },
+      { name: '/hcmus-news setup <channel>', description: 'Thiết lập kênh nhận tin HCMUS.' },
+      { name: '/hcmus-news status', description: 'Kiểm tra trạng thái nhận tin.' },
+      { name: '/hcmus-news remove', description: 'Ngừng gửi tin vào kênh đã thiết lập.' },
+    ],
+  },
+  {
+    id: 'gemini',
+    title: 'AI Gemini',
+    description: 'Chat với Gemini',
+    emoji: '✨',
+    color: 0x9b59b6,
+    commands: [
+      {
+        name: '/gemini <prompt> [attachment]',
+        description: 'Trò chuyện với Gemini, có thể đính kèm tệp.',
+      },
+    ],
+  },
+  {
+    id: 'coin',
+    title: 'Trò chơi Coin',
+    description: 'Điểm danh, xem số dư và đặt cược coin',
+    emoji: '🪙',
+    color: 0xf1c40f,
+    commands: [
+      { name: '/coin daily', description: 'Điểm danh nhận coin mỗi ngày.' },
+      { name: '/coin cash', description: 'Xem số coin đang có.' },
+      { name: '/coin info', description: 'Xem số dư và thống kê coin.' },
+      { name: '/coin flip <amount>', description: 'Cược tung đồng xu.' },
+      { name: '/coin dice <guess> <amount>', description: 'Đoán mặt xúc xắc và đặt cược.' },
+      { name: '/coin jackpot <amount>', description: 'Quay jackpot bằng coin.' },
+      { name: '/coin baucua <symbol> <amount>', description: 'Đặt cược bầu cua.' },
+    ],
+  },
+  {
+    id: 'admin',
+    title: 'Quản trị',
+    description: 'Quản lý quyền sử dụng bot',
+    emoji: '🛡️',
+    color: 0xe74c3c,
+    commands: [
+      {
+        name: '/ban usebot <user> <time> [reason]',
+        description: 'Cấm người dùng sử dụng bot (admin only).',
+      },
+      { name: '/unban usebot <user>', description: 'Gỡ cấm người dùng (admin only).' },
+    ],
+  },
+];
