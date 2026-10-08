@@ -2,6 +2,7 @@ import { logger } from '../../../logging/logger.ts';
 import { NEWS_SOURCES } from '../resources/links.ts';
 import type { NewsSource, RawNewsItem } from '../types/types.ts';
 import { crawlJsonNews } from './crawl/json.ts';
+import { crawlPctsvNews } from './crawl/pctsv.ts';
 import { crawlRssNews } from './crawl/rss.ts';
 
 export async function crawlSource(source: NewsSource): Promise<RawNewsItem[]> {
@@ -9,8 +10,10 @@ export async function crawlSource(source: NewsSource): Promise<RawNewsItem[]> {
     return crawlRssNews(source.url, source.category);
   } else if (source.type === 'json') {
     return crawlJsonNews(source.url, source.category);
+  } else if (source.type === 'pctsv') {
+    return crawlPctsvNews(source.url, source.category);
   }
-  throw new Error(`Unknown source type: ${source.type}`);
+  throw new Error(`Unsupported news source type: ${source.type}`);
 }
 
 export async function crawlAllSources(): Promise<RawNewsItem[]> {

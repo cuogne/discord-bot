@@ -1,6 +1,7 @@
-export type NewsCategory = 'fithcmus' | 'lichthi' | 'thongbao' | 'hcmus' | 'ctda' | 'tintuc';
+export type NewsCategory =
+  'fithcmus' | 'lichthi' | 'thongbao' | 'hcmus' | 'ctda' | 'tintuc' | 'pctsv';
 
-export type NewsFeedType = 'rss' | 'json';
+export type NewsFeedType = 'rss' | 'json' | 'pctsv';
 
 export interface NewsSource {
   readonly url: string;

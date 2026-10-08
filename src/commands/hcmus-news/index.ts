@@ -26,6 +26,7 @@ const command: SlashCommand = {
               { name: 'Thông tin dành cho sinh viên - HCMUS', value: 'hcmus' },
               { name: 'Chương trình đề án CNTT - CLC/APCS', value: 'ctda' },
               { name: 'Tin tức chung - HCMUS', value: 'tintuc' },
+              { name: 'Phòng công tác sinh viên - OSA@HCMUS', value: 'pctsv' },
             ),
         )
         .addIntegerOption((option) =>

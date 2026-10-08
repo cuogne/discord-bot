@@ -40,6 +40,12 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
     category: 'tintuc',
     type: 'json',
   },
+  {
+    url: 'https://ctsv.hcmus.edu.vn/api/news/latest?limit=10',
+    name: 'Phòng công tác sinh viên - HCMUS',
+    category: 'pctsv',
+    type: 'pctsv',
+  },
 ] as const;
 
 export const CATEGORY_NAMES: Record<NewsCategory, string> = {
@@ -49,4 +55,5 @@ export const CATEGORY_NAMES: Record<NewsCategory, string> = {
   hcmus: 'Thông tin dành cho sinh viên - HCMUS',
   ctda: 'Chương trình đề án CNTT - CLC/APCS',
   tintuc: 'Tin tức chung - HCMUS',
+  pctsv: 'Phòng công tác sinh viên - OSA@HCMUS',
 };
