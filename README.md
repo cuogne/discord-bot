@@ -23,6 +23,7 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/coin jackpot` | `amount` | Quay jackpot bằng coin. | `/coin jackpot amount:100` |
 | `/coin baucua` | `symbol`, `amount` | Đặt cược bầu cua. | `/coin baucua symbol:Cua amount:100` |
 | `/coin info` | — | Xem số dư và thống kê coin. | `/coin info` |
+| `/currency` | `from`, `to`, `amount` | Quy đổi tiền theo tỷ giá tham khảo gần nhất từ Frankfurter. | `/currency from:USD to:VND amount:5` |
 | `/dictionary` | `text` | Tra từ điển tiếng Anh. | `/dictionary text:care` |
 | `/football club` | `club` | Xem lịch thi đấu của một câu lạc bộ. | `/football club club:Manchester United` |
 | `/football score` | — | Xem tỉ số các trận đấu gần đây. | `/football score` |
@@ -40,4 +41,5 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/random` | `text` | Chọn ngẫu nhiên một mục trong danh sách phân cách bằng dấu phẩy. | `/random text:táo,cam,chuối` |
 | `/send` | `message` | Reply một tin nhắn bằng bot. | `/send message:Xin chào mọi người` |
 | `/today` | — | Hiển thị ngày giờ hiện tại theo dương lịch và âm lịch. | `/today` |
+| `/translate` | `to`, `text` | Dịch văn bản, tự nhận biết ngôn ngữ gốc. | `/translate to:Tiếng Việt text:Hello, how are you?` |
 | `/unban usebot` | `user` | Gỡ cấm người dùng sử dụng bot. | `/unban usebot user:@cừn` |

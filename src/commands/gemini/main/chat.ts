@@ -3,11 +3,12 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import { setCommandUsageError, setGeminiUsageLog } from '../../../logging/context.ts';
 import { logger } from '../../../logging/logger.ts';
 import { formatResponseTime } from '../../../utils/format.ts';
+import { handleUserCooldown } from '../../../utils/cooldown.ts';
 import { isGeminiConfigured } from '../../../core/gemini/config.ts';
 import { getGeminiClient } from '../../../core/gemini/client.ts';
 import { generateContentStreamWithFallback } from './client.ts';
 import { getWebContext } from '../search/tavily.ts';
-import { handleCooldown, markCooldown } from '../utils/cooldown.ts';
+import { GEMINI_COOLDOWN_MS } from '../utils/config.ts';
 import { downloadGeminiAttachment } from '../utils/attachment.ts';
 import { buildAttachmentPreview } from '../utils/embed.ts';
 import { StreamReplier } from '../utils/streamReply.ts';
@@ -22,11 +23,9 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
     return;
   }
 
-  // cooldown 10s for each request
-  if (await handleCooldown(interaction)) {
+  if (await handleUserCooldown(interaction, GEMINI_COOLDOWN_MS)) {
     return;
   }
-  markCooldown(interaction.user.id);
 
   // handle Gemini prompt and attachment
   const prompt = interaction.options.getString('prompt', true);

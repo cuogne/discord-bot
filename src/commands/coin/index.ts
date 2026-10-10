@@ -1,7 +1,7 @@
-import { MessageFlags, SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
-import { MAX_COIN } from './config.ts';
-import { tryStartCoinCooldown } from './cooldown.ts';
+import { handleUserCooldown } from '../../utils/cooldown.ts';
+import { COIN_COOLDOWN_MS, MAX_COIN } from './config.ts';
 import { handleCoinBauCua } from './subcommands/baucua/index.ts';
 import { handleCoinCash } from './subcommands/cash.ts';
 import { handleCoinDaily } from './subcommands/daily.ts';
@@ -128,12 +128,7 @@ const command: SlashCommand = {
 
       // Read-only lookup: never consume the game cooldown.
       if (subcommand !== 'cash' && subcommand !== 'info') {
-        const remainingMs = tryStartCoinCooldown(interaction.user.id);
-        if (remainingMs > 0) {
-          await interaction.reply({
-            content: `Bạn chờ **${Math.ceil(remainingMs / 1000)} giây** rồi dùng /coin tiếp nha.`,
-            flags: MessageFlags.Ephemeral,
-          });
+        if (await handleUserCooldown(interaction, COIN_COOLDOWN_MS)) {
           return;
         }
       }

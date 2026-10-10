@@ -12,6 +12,14 @@ export const HELP_PAGES: HelpPage[] = [
       { name: '/ping', description: 'Kiểm tra độ trễ của bot.' },
       { name: '/today', description: 'Xem ngày dương, ngày âm và giờ hoàng đạo.' },
       { name: '/calendar <month> <year>', description: 'Xem lịch của một tháng trong năm.' },
+      {
+        name: '/currency <from> <to> <amount>',
+        description: 'Quy đổi tiền tệ theo tỷ giá tham khảo gần nhất.',
+      },
+      {
+        name: '/translate <to> <text>',
+        description: 'Dịch văn bản, tự nhận biết ngôn ngữ gốc.',
+      },
       { name: '/dictionary <text>', description: 'Tra nghĩa và phiên âm từ tiếng Anh.' },
       {
         name: '/random <text>',

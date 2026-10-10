@@ -52,6 +52,9 @@ export function buildHelpEmbed(
     });
 
   if (page.id === 'hcmus') {
+    const setupCommandMention = hcmusCommandId
+      ? chatInputApplicationCommandMention('hcmus-news', 'setup', hcmusCommandId)
+      : '`/hcmus-news setup`';
     let commandList = '';
     for (const command of page.commands) {
       if (commandList) {
@@ -75,7 +78,7 @@ export function buildHelpEmbed(
     embed.addFields({
       name: '🔐 Điều kiện nhận tin tự động',
       value: '\n- **Bot:** được thêm vào server và có đủ quyền **View Channel**, **Send Messages**, **Embed Links** tại kênh nhận tin (Quyền này sẽ được yêu cầu lúc bạn thêm bot vào server).\n\n' +
-        '- **Bạn:** cần có quyền **Manage Channels** hoặc **Administrator** để dùng `/hcmus-news setup`. Mỗi server chỉ có thể chọn **1 kênh** nhận tin.\n\n' +
+        `- **Bạn:** cần có quyền **Manage Channels** hoặc **Administrator** để dùng ${setupCommandMention}. Mỗi server chỉ có thể chọn **1 kênh** nhận tin.\n\n` +
         '> Tips: Bạn nên tạo 1 server mới cho riêng bạn, lúc này bạn sẽ có đầy đủ các quyền, và nhớ set Notification trong Channels đó là All Messages để không miss tin tức.'
     });
 
