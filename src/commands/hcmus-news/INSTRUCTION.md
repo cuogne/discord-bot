@@ -18,7 +18,7 @@
 
 Hiện tại mình có 2 phiên bản: Discord và Telegram
 
-- Discord: [Link bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands)
+- Discord: [Link bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849)
 
 - Telegram: [Link bot Telegram](https://t.me/hcmus_tintuc_bot)
 
@@ -91,6 +91,11 @@ Nhấn `Xác nhận` để hoàn tất thiết lập.
 
 - Vậy là thành công, mỗi khi có tin mới từ các web của HCMUS, bot sẽ tự động gửi tin vào kênh bạn đã chọn như phần Demo ở trên, thời gian quét thông báo để gửi là 10 phút / lần.
 
+- Nhớ bật `Notification` trong kênh đó là `All Messages` để không bỏ lỡ tin mới nhé.
+
+<p align="center">
+  <img src="./resources/image/all_message.png" alt="Fit HCMUS News notification setup"/>
+
 - Nếu bạn không muốn nhận tin nữa, bạn chỉ cần vào kênh đó gõ lệnh `/hcmus-news remove`, xác nhận là xong, sẽ không còn thông báo nào gửi đến nữa.
 
 <p align="center">
@@ -115,5 +120,6 @@ Các web của HCMUS mà bot sẽ theo dõi để gửi thông báo (nguồn ch�
 | Khoa CNTT - FIT@HCMUS        | https://www.fit.hcmus.edu.vn/tin-tuc                                       |
 | CLC/APCS - CTĐA@HCMUS        | https://www.ctda.hcmus.edu.vn/vi/thong-bao/                                |
 | Tin tức chung - HCMUS        | https://hcmus.edu.vn/category/tin-tuc                                      |
+| Phòng Công tác sinh viên     | https://ctsv.hcmus.edu.vn/info                                             |
 
 ---

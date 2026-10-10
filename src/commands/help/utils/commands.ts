@@ -36,14 +36,34 @@ export const HELP_PAGES: HelpPage[] = [
     ],
   },
   {
-    id: 'cinestar',
-    title: 'Lịch chiếu phim Cinestar',
-    description: 'Xem lịch chiếu phim trong ngày tại Cinestar.',
-    emoji: '🎬',
-    color: 0xe67e22,
+    id: 'hcmus',
+    title: 'Tin tức HCMUS',
+    description: 'Nhận tin mới và thông báo tin tức tự động từ HCMUS',
+    emoji: '📰',
+    color: 0x1abc9c,
     commands: [
-      { name: '/cinestar today [cinema]', description: 'Xem suất chiếu hôm nay tại Cinestar.' },
-      { name: '/cinestar upcoming', description: 'Xem phim sắp chiếu tại Cinestar.' },
+      {
+        name: '/hcmus-news latest <category> [number]',
+        description: 'Xem các tin HCMUS mới nhất theo danh mục',
+        subcommand: 'latest',
+        usageHint: '<category> [number]',
+      },
+      {
+        name: '/hcmus-news setup <channel>',
+        description: 'Thiết lập kênh nhận tin HCMUS. Bot sẽ gửi tin vào kênh này.',
+        subcommand: 'setup',
+        usageHint: '<channel>',
+      },
+      {
+        name: '/hcmus-news status',
+        description: 'Kiểm tra thông tin và trang trái nhận tin.',
+        subcommand: 'status',
+      },
+      {
+        name: '/hcmus-news remove',
+        description: 'Ngừng gửi tin vào kênh đã thiết lập. Bot sẽ không gửi tin nữa.',
+        subcommand: 'remove',
+      },
     ],
   },
   {
@@ -60,19 +80,6 @@ export const HELP_PAGES: HelpPage[] = [
     ],
   },
   {
-    id: 'hcmus',
-    title: 'Tin tức HCMUS',
-    description: 'Tin mới và thông báo tin tức tự động từ HCMUS',
-    emoji: '📰',
-    color: 0x1abc9c,
-    commands: [
-      { name: '/hcmus-news latest <category> [number]', description: 'Xem tin HCMUS mới nhất.' },
-      { name: '/hcmus-news setup <channel>', description: 'Thiết lập kênh nhận tin HCMUS.' },
-      { name: '/hcmus-news status', description: 'Kiểm tra trạng thái nhận tin.' },
-      { name: '/hcmus-news remove', description: 'Ngừng gửi tin vào kênh đã thiết lập.' },
-    ],
-  },
-  {
     id: 'gemini',
     title: 'AI Gemini',
     description: 'Chat với Gemini',
@@ -83,6 +90,17 @@ export const HELP_PAGES: HelpPage[] = [
         name: '/gemini <prompt> [attachment]',
         description: 'Trò chuyện với Gemini, có thể đính kèm tệp.',
       },
+    ],
+  },
+  {
+    id: 'cinestar',
+    title: 'Lịch chiếu phim Cinestar',
+    description: 'Xem lịch chiếu phim trong ngày tại Cinestar.',
+    emoji: '🎬',
+    color: 0xe67e22,
+    commands: [
+      { name: '/cinestar today [cinema]', description: 'Xem suất chiếu hôm nay tại Cinestar.' },
+      { name: '/cinestar upcoming', description: 'Xem phim sắp chiếu tại Cinestar.' },
     ],
   },
   {
@@ -104,7 +122,7 @@ export const HELP_PAGES: HelpPage[] = [
   {
     id: 'admin',
     title: 'Quản trị',
-    description: 'Quản lý quyền sử dụng bot',
+    description: 'Quản lý quyền sử dụng bot (Admin only).',
     emoji: '🛡️',
     color: 0xe74c3c,
     commands: [

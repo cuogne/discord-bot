@@ -1,6 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { logger } from '../../../logging/logger.ts';
+import { getChatInputCommandId } from '../../../utils/command.ts';
 import { HELP_PAGES } from '../utils/commands.ts';
 import { buildHelpMenu, HELP_DIRECTORY_ID } from '../utils/components.ts';
 import { buildHelpEmbed } from '../utils/embed.ts';
@@ -31,6 +32,20 @@ export async function handleHelpSelection(interaction: StringSelectMenuInteracti
       return;
     }
 
+    if (selectedId === 'hcmus') {
+      await interaction.deferUpdate();
+
+      const hcmusCommandId =
+        (await getChatInputCommandId(interaction.client, 'hcmus-news')) ?? undefined;
+
+      // prettier-ignore
+      await interaction.editReply({
+        embeds: [buildHelpEmbed(selectedId, interaction.client.user.displayAvatarURL(), hcmusCommandId)],
+        components: [buildHelpMenu(ownerId, selectedId)],
+      });
+      return;
+    }
+
     // prettier-ignore
     await interaction.update({
       embeds: [buildHelpEmbed(selectedId, interaction.client.user.displayAvatarURL())],
@@ -47,7 +62,25 @@ export async function handleHelpSelection(interaction: StringSelectMenuInteracti
       'Failed to handle help category selection',
     );
 
-    if (!interaction.replied && !interaction.deferred) {
+    if (interaction.deferred) {
+      try {
+        // prettier-ignore
+        await interaction.editReply({
+          content: 'Không thể mở danh mục lúc này. Vui lòng thử lại sau.',
+          embeds: [],
+          components: [],
+        });
+      } catch (replyError) {
+        // prettier-ignore
+        logger.warn(
+          {
+            err: replyError,
+            userId: interaction.user.id,
+          },
+          'Failed to edit help selection error reply',
+        );
+      }
+    } else if (!interaction.replied) {
       try {
         // prettier-ignore
         await interaction.reply({

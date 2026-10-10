@@ -1,6 +1,8 @@
 export interface HelpCommand {
   name: string;
   description: string;
+  subcommand?: string;
+  usageHint?: string;
 }
 
 export interface HelpPage {

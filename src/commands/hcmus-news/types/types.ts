@@ -5,6 +5,7 @@ export type NewsFeedType = 'rss' | 'json' | 'pctsv';
 
 export interface NewsSource {
   readonly url: string;
+  readonly sourceLink: string;
   readonly name: string;
   readonly category: NewsCategory;
   readonly type: NewsFeedType;

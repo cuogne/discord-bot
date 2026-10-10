@@ -21,12 +21,12 @@ const command: SlashCommand = {
             .setRequired(true)
             .addChoices(
               { name: 'Khoa Công nghệ Thông tin - FIT@HCMUS', value: 'fithcmus' },
-              { name: 'Lịch thi HCMUS - PKTĐBCL', value: 'lichthi' },
-              { name: 'Thông báo Phòng khảo thí - PKTĐBCL', value: 'thongbao' },
-              { name: 'Thông tin dành cho sinh viên - HCMUS', value: 'hcmus' },
-              { name: 'Chương trình đề án CNTT - CLC/APCS', value: 'ctda' },
+              { name: 'Chương trình Đề án CNTT (CLC/APCS) - CTĐA@HCMUS', value: 'ctda' },
+              { name: 'Thông tin dành cho Sinh viên - HCMUS', value: 'hcmus' },
+              { name: 'Phòng Công tác Sinh viên - OSA@HCMUS', value: 'pctsv' },
+              { name: 'Thông báo Lịch thi - PKTĐBCL@HCMUS', value: 'lichthi' },
+              { name: 'Thông báo Phòng khảo thí - PKTĐBCL@HCMUS', value: 'thongbao' },
               { name: 'Tin tức chung - HCMUS', value: 'tintuc' },
-              { name: 'Phòng công tác sinh viên - OSA@HCMUS', value: 'pctsv' },
             ),
         )
         .addIntegerOption((option) =>
