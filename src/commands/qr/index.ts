@@ -1,5 +1,6 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
+import { fetchWithTimeout } from '../../utils/http.ts';
 
 const command: SlashCommand = {
   // prettier-ignore
@@ -72,7 +73,7 @@ const command: SlashCommand = {
     const user = interaction.user;
 
     const qrUrl = new URL(
-      `https://img.vietqr.io/image/${encodeURIComponent(bank)}-${encodeURIComponent(account)}-print.jpg`,
+      `https://img.vietqr.io/image/${encodeURIComponent(bank)}-${encodeURIComponent(account)}-print.png`,
     );
     if (amount !== null) {
       qrUrl.searchParams.set('amount', String(amount));
@@ -84,14 +85,28 @@ const command: SlashCommand = {
       qrUrl.searchParams.set('accountName', accountName);
     }
 
-    await interaction.reply({
-      embeds: [
-        // prettier-ignore
-        new EmbedBuilder()
-          .setDescription(`### Mã QR chuyển khoản của ${user}`)
-          .setImage(qrUrl.toString()),
-      ],
-    });
+    await interaction.deferReply();
+
+    try {
+      const response = await fetchWithTimeout(qrUrl);
+      if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) {
+        throw new Error(`VietQR returned HTTP ${response.status}`);
+      }
+
+      const image = Buffer.from(await response.arrayBuffer());
+      const attachment = new AttachmentBuilder(image, { name: 'vietqr.png' });
+
+      await interaction.editReply({
+        files: [attachment],
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(`### Mã QR chuyển khoản của ${user}`)
+            .setImage('attachment://vietqr.png'),
+        ],
+      });
+    } catch {
+      await interaction.editReply('Không tải được ảnh QR từ VietQR. Vui lòng thử lại sau.');
+    }
   },
 };
 
