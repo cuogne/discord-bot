@@ -106,5 +106,17 @@ export function buildHelpEmbed(
     });
   }
 
+  if (page.id === 'studocu') {
+    // prettier-ignore
+    embed.addFields({
+      name: '📌 Giới hạn tải Studocu Free',
+      value: 'Số lượng tải file Studocu Free trong một tháng có hạn, áp dụng chung cho tất cả user dùng bot và command này, không tính riêng cho 1 user (vì chủ bot quá nghèo).\n\n' +
+        'Việc tải phụ thuộc vào kích thước file, server và số requests còn lại của server. Nếu bạn không tải được, bạn có thể liên hệ <@853264116332101652> để admin tải giúp bạn luôn.\n\n' +
+        'Bot chỉ là tool lởm giúp bạn tải file, nên đôi khi file sẽ bị nhảy chữ, file lỏ, mờ, bị chặn từ studocu,...\n\n' +
+        '**Lưu ý:** Nếu file tải về vượt quá **20 MB** (giới hạn gửi file của Discord mà không dùng Nitro), vui lòng liên hệ admin để download dùm luôn.\n\n' +
+        '> Việc down dùm sẽ còn phụ thuộc vào tốc độ phản hồi của admin, nên mong mấy bạn thông cảm.',
+    });
+  }
+
   return embed;
 }

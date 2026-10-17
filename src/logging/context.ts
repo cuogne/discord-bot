@@ -1,7 +1,8 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import type { CommandUsageLog, GeminiUsageLog } from '../types/log.ts';
+import type { CommandUsageLog, GeminiUsageLog, StudocuTimingLog } from '../types/log.ts';
 
 const commandUsageDetails = new WeakMap<ChatInputCommandInteraction, GeminiUsageLog>();
+const studocuTimingDetails = new WeakMap<ChatInputCommandInteraction, StudocuTimingLog>();
 const commandUsageErrors = new WeakMap<ChatInputCommandInteraction, string>();
 
 export function setGeminiUsageLog(
@@ -9,6 +10,13 @@ export function setGeminiUsageLog(
   details: GeminiUsageLog,
 ): void {
   commandUsageDetails.set(interaction, details);
+}
+
+export function setStudocuTimingLog(
+  interaction: ChatInputCommandInteraction,
+  details: StudocuTimingLog,
+): void {
+  studocuTimingDetails.set(interaction, details);
 }
 
 export function setCommandUsageError(
@@ -48,6 +56,7 @@ export function createCommandUsageContext(
     channelId: interaction.channelId,
     channel: channelName,
     gemini: commandUsageDetails.get(interaction),
+    studocu: studocuTimingDetails.get(interaction),
     error: commandUsageErrors.get(interaction),
   };
 }

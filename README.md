@@ -40,6 +40,7 @@ Thêm bot vào server của bạn: [Invite bot](https://discord.com/oauth2/autho
 | `/qr` | `bank`, `account`, `amount`, `description`, `accountname` | Tạo mã QR chuyển khoản, có thể thêm số tiền, nội dung và tên chủ tài khoản. | `/qr bank:Vietcombank account:123456789 amount:50000` |
 | `/random` | `text` | Chọn ngẫu nhiên một mục trong danh sách phân cách bằng dấu phẩy. | `/random text:táo,cam,chuối` |
 | `/send` | `message` | Reply một tin nhắn bằng bot. | `/send message:Xin chào mọi người` |
+| `/studocu` | `link` | Tải tài liệu Studocu Free không dính watermark. | `/studocu link:https://www.studocu.vn/vn/document/.../145755491` |
 | `/today` | — | Hiển thị ngày giờ hiện tại theo dương lịch và âm lịch. | `/today` |
 | `/translate` | `to`, `text` | Dịch văn bản, tự nhận biết ngôn ngữ gốc. | `/translate to:Tiếng Việt text:Hello, how are you?` |
 | `/unban usebot` | `user` | Gỡ cấm người dùng sử dụng bot. | `/unban usebot user:@cừn` |

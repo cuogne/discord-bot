@@ -85,6 +85,22 @@ export async function sendCommandUsageLog(
       });
     }
 
+    if (logData.studocu) {
+      const timing = logData.studocu;
+      embed.addFields({
+        name: 'Studocu timing',
+        value: [
+          `Kết nối server: **${(timing.connectionMs / 1_000).toFixed(1)} giây**`,
+          `Điều hướng Studocu: **${(timing.navigationMs / 1_000).toFixed(1)} giây**`,
+          `Quét ${timing.pageCount} trang: **${(timing.scanMs / 1_000).toFixed(1)} giây**`,
+          `Tạo PDF: **${(timing.pdfMs / 1_000).toFixed(1)} giây**`,
+          `Đóng phiên, gửi file: **${(timing.deliveryMs / 1_000).toFixed(1)} giây**`,
+          `Toàn bộ command: **${((logData.durationMs ?? 0) / 1_000).toFixed(1)} giây**`,
+        ].join('\n'),
+        inline: false,
+      });
+    }
+
     if (logData.error) {
       embed.addFields({
         name: 'Error',

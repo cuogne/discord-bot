@@ -75,6 +75,19 @@ export const HELP_PAGES: HelpPage[] = [
     ],
   },
   {
+    id: 'studocu',
+    title: 'Download Studocu Free',
+    description: 'Giúp bạn down Studocu PDF không bị dính watermark.',
+    emoji: '📄',
+    color: 0x3498db,
+    commands: [
+      {
+        name: '/studocu <link>',
+        description: 'Dán link tài liệu Studocu để bot quét và gửi file PDF.',
+      },
+    ],
+  },
+  {
     id: 'football',
     title: 'Lịch thi đấu bóng đá',
     description: 'Lịch đấu và tỉ số các trận bóng đá của các giải đấu và CLB ở châu Âu.',

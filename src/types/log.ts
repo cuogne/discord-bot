@@ -4,6 +4,16 @@ export interface GeminiUsageLog {
   tokensOutput: number;
 }
 
+export interface StudocuTimingLog {
+  connectionMs: number;
+  navigationMs: number;
+  scanMs: number;
+  pdfMs: number;
+  deliveryMs: number;
+  pageCount: number;
+  pdfBytes: number;
+}
+
 export interface CommandUsageLog {
   userId: string;
   user: string;
@@ -15,5 +25,6 @@ export interface CommandUsageLog {
   channel: string;
   durationMs?: number;
   gemini?: GeminiUsageLog;
+  studocu?: StudocuTimingLog;
   error?: string;
 }
