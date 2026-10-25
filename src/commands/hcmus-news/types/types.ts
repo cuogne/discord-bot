@@ -15,6 +15,7 @@ export interface RawNewsItem {
   readonly category: NewsCategory;
   readonly title: string;
   readonly url: string;
+  readonly content?: string;
 }
 
 export interface ProcessedNewsItem {
