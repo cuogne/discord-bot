@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../../logging/context.ts';
 import { buildPokemonEmbed } from '../utils/embed.ts';
 import { fetchPokemon, fetchPokemonSpecies } from '../utils/api.ts';
 
@@ -14,12 +14,14 @@ export async function handlePokemon(interaction: ChatInputCommandInteraction): P
   const inputName = interaction.options.getString('name');
 
   if (inputId && inputName) {
+    setCommandUsageRejection(interaction, 'conflicting-identifiers');
     await interaction.editReply('Vui lòng chỉ nhập ID hoặc tên, không được nhập cả hai!');
     return;
   }
 
   const identifier = resolveIdentifier(inputId, inputName);
   if (!identifier) {
+    setCommandUsageRejection(interaction, 'invalid-identifier');
     await interaction.editReply(
       'ID Pokémon không hợp lệ! Vui lòng nhập ID từ 1-1025 hoặc từ 10001-10277.',
     );
@@ -35,14 +37,7 @@ export async function handlePokemon(interaction: ChatInputCommandInteraction): P
       embeds: [embed],
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        id: inputId,
-        name: inputName,
-      },
-      'Lỗi khi truy vấn dữ liệu Pokémon',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.editReply({
       content: 'Đã xảy ra lỗi khi truy vấn dữ liệu Pokémon. Vui lòng thử lại sau.',
     });

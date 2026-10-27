@@ -1,6 +1,6 @@
 import { differenceInMilliseconds } from 'date-fns';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageDetails } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { formatResponseTime } from '../../utils/format.ts';
 
@@ -14,7 +14,8 @@ const command: SlashCommand = {
     const startedAt = new Date();
     await interaction.deferReply();
 
-    const responseTime = formatResponseTime(differenceInMilliseconds(new Date(), startedAt));
+    const responseTimeMs = differenceInMilliseconds(new Date(), startedAt);
+    const responseTime = formatResponseTime(responseTimeMs);
     const embed = new EmbedBuilder()
       .setColor(0x5865f2)
       .setTitle('🏓 Pong!')
@@ -27,13 +28,9 @@ const command: SlashCommand = {
       embeds: [embed],
     });
 
-    logger.info(
-      {
-        responseTime,
-        websocketPing: interaction.client.ws.ping,
-      },
-      'ping response',
-    );
+    setCommandUsageDetails(interaction, {
+      ping: { responseTimeMs, websocketPingMs: interaction.client.ws.ping },
+    });
   },
 };
 

@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 import { getCinema } from '../data/cinemas.ts';
 import { fetchTodayMovies } from '../api/client.ts';
 import { buildMovieSelect } from '../utils/components.ts';
@@ -51,14 +51,7 @@ export async function handleToday(interaction: ChatInputCommandInteraction): Pro
       ],
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        cinema: cinema.name,
-        date: today,
-      },
-      'Lỗi khi lấy lịch chiếu Cinestar',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.editReply('Có lỗi xảy ra khi cập nhật lịch chiếu phim.');
   }
 }

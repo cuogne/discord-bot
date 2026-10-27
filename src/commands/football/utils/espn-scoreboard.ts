@@ -15,38 +15,65 @@ function buildScoreboardUrl(tournamentId: string, dates: string): string {
   return `${ESPN_SCOREBOARD_BASE}/${tournamentId}/scoreboard?dates=${dates}`;
 }
 
-// Fetch one scoreboard; return null (with a warn log) instead of throwing
-// so one bad response never takes down the whole batch.
-async function fetchBoard(tournamentId: string, dates: string): Promise<ScoreboardResult | null> {
+interface BoardFetchOutcome {
+  result: ScoreboardResult | null;
+  error?: unknown;
+  tournamentId: string;
+  dates: string;
+}
+
+// Keep individual failures so a partial batch can continue, while an entirely
+// failed batch can report the underlying errors to the command logger.
+async function fetchBoard(tournamentId: string, dates: string): Promise<BoardFetchOutcome> {
   try {
     const board = await espnFetch<EspnScoreboard>(buildScoreboardUrl(tournamentId, dates));
     return {
+      result: { tournamentId, board },
       tournamentId,
-      board,
+      dates,
     };
   } catch (error) {
+    return { result: null, error, tournamentId, dates };
+  }
+}
+
+function getSuccessfulBoards(outcomes: BoardFetchOutcome[]): ScoreboardResult[] {
+  const successes = outcomes.flatMap((outcome) => (outcome.result ? [outcome.result] : []));
+  const failures = outcomes.filter((outcome) => outcome.result === null);
+
+  if (successes.length === 0 && failures.length > 0) {
+    throw new AggregateError(
+      failures.map(
+        (failure) =>
+          new Error(`ESPN scoreboard ${failure.tournamentId} ${failure.dates} failed`, {
+            cause: failure.error,
+          }),
+      ),
+      'All ESPN scoreboard requests failed',
+    );
+  }
+
+  for (const failure of failures) {
     logger.warn(
       {
-        err: error,
-        tournamentId,
-        dates,
+        err: failure.error,
+        tournamentId: failure.tournamentId,
+        dates: failure.dates,
       },
       'Failed to fetch ESPN scoreboard',
     );
-    return null;
   }
+
+  return successes;
 }
 
 // Flatten fetched boards into events, skipping failed boards and unwanted events.
 function collectEvents(
-  results: (ScoreboardResult | null)[],
+  results: ScoreboardResult[],
   isWanted: (event: EspnEvent) => boolean = () => true,
 ): TournamentEventResult[] {
   const items: TournamentEventResult[] = [];
   for (const result of results) {
-    if (result === null) {
-      continue;
-    }
     for (const event of result.board.events ?? []) {
       if (!isWanted(event)) {
         continue;
@@ -75,7 +102,7 @@ export async function fetchScoreboardsForDates(
     }
   }
 
-  return collectEvents(await Promise.all(fetchPromises));
+  return collectEvents(getSuccessfulBoards(await Promise.all(fetchPromises)));
 }
 
 /*
@@ -91,17 +118,7 @@ export async function fetchScoreboardsForMonths(
 ): Promise<EspnScoreboard[]> {
   // `months` must already be unique — built once from the caller.
   const results = await Promise.all(months.map((month) => fetchBoard(tournamentId, month)));
-  const boards = results
-    .filter((result): result is ScoreboardResult => result !== null)
-    .map((result) => result.board);
-
-  if (boards.length === 0) {
-    throw new Error(
-      `Không lấy được lịch thi đấu ${tournamentId} cho các tháng ${months.join(', ')}`,
-    );
-  }
-
-  return boards;
+  return getSuccessfulBoards(results).map((result) => result.board);
 }
 
 /*

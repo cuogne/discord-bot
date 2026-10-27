@@ -5,6 +5,7 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 import type { SlashCommand } from '../../types/command';
+import { setCommandUsageRejection } from '../../logging/context.ts';
 
 const linkGif =
   'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm9lZW5uMWRzcXM4ZDg2MGgzYW9iZGxvejBkNXFjbmVsb3BzM3N5bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/G9qfCvxlwGAaQ/giphy.gif';
@@ -29,6 +30,7 @@ const command: SlashCommand = {
       .filter((item) => item.length > 0);
 
     if (listRandom.length === 0) {
+      setCommandUsageRejection(interaction, 'empty-options');
       await interaction.reply({
         content: 'Danh sách lựa chọn không hợp lệ. Vui lòng cung cấp ít nhất một lựa chọn.',
         flags: MessageFlags.Ephemeral,

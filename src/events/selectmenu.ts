@@ -42,6 +42,10 @@ export async function executeSelectMenu(interaction: StringSelectMenuInteraction
     logger.error(
       {
         err: error,
+        interactionId: interaction.id,
+        userId: interaction.user.id,
+        guildId: interaction.guildId ?? 'DM',
+        channelId: interaction.channelId,
         customId: interaction.customId,
       },
       'Error processing select menu',

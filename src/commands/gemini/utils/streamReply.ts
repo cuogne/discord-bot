@@ -1,5 +1,4 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
 import { splitTextSmartly } from './splitSmart.ts';
 
 const THROTTLE_MS = 1000;
@@ -43,36 +42,27 @@ export class StreamReplier {
     const textToDisplay = (this.fullText || '...') + cursor;
     const parts = splitTextSmartly(textToDisplay, 1950);
 
-    try {
-      if (parts.length > 0) {
-        await this.interaction.editReply({
-          content: parts[0],
-        });
-      }
+    if (parts.length > 0) {
+      await this.interaction.editReply({
+        content: parts[0],
+      });
+    }
 
-      for (let i = 1; i < parts.length; i++) {
-        const followUpIndex = i - 1;
-        const existingId = this.followUpMessageIds[followUpIndex];
-        if (existingId) {
-          // use webhook to edit the message instead of Message.edit to avoid dependency on channel cache.
-          // fix ChannelNotCached when bot is denied View Channel / thread / DM.
-          await this.interaction.webhook.editMessage(existingId, {
-            content: parts[i],
-          });
-        } else {
-          const msg = await this.interaction.followUp({
-            content: parts[i],
-          });
-          this.followUpMessageIds[followUpIndex] = msg.id;
-        }
+    for (let i = 1; i < parts.length; i++) {
+      const followUpIndex = i - 1;
+      const existingId = this.followUpMessageIds[followUpIndex];
+      if (existingId) {
+        // use webhook to edit the message instead of Message.edit to avoid dependency on channel cache.
+        // fix ChannelNotCached when bot is denied View Channel / thread / DM.
+        await this.interaction.webhook.editMessage(existingId, {
+          content: parts[i],
+        });
+      } else {
+        const msg = await this.interaction.followUp({
+          content: parts[i],
+        });
+        this.followUpMessageIds[followUpIndex] = msg.id;
       }
-    } catch (editErr) {
-      logger.warn(
-        {
-          err: editErr,
-        },
-        'Failed to update streaming message',
-      );
     }
   }
 }

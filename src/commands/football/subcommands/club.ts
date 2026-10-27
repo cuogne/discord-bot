@@ -2,10 +2,10 @@ import { isAfter, parseISO } from 'date-fns';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { CLUBS } from '../data/clubs.ts';
-import { EspnApiError, espnFetch, getCompetitor } from '../utils/espn.ts';
+import { espnFetch, getCompetitor } from '../utils/espn.ts';
 import type { EspnSchedule } from '../types/types.ts';
 import { FOOTBALL_EMBED_COLOR, formatKickoff } from '../utils/format.ts';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 
 const MAX_UPCOMING_MATCHES = 5;
 
@@ -53,14 +53,7 @@ export async function handleFootballClub(interaction: ChatInputCommandInteractio
       embeds: [embeds],
     });
   } catch (err) {
-    logger.error(
-      {
-        err,
-        clubId,
-        status: err instanceof EspnApiError ? err.status : undefined,
-      },
-      'Lỗi khi lấy lịch thi đấu câu lạc bộ',
-    );
+    setCommandUsageError(interaction, err);
     await interaction.editReply('Có lỗi xảy ra khi lấy lịch đá banh.');
   }
 }

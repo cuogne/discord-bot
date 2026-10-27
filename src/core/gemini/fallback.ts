@@ -20,7 +20,7 @@ export async function generateWithModelFallback<T>(
   let lastError: unknown;
   const models = getPreferredModels(preferredModel);
 
-  for (const model of models) {
+  for (const [index, model] of models.entries()) {
     try {
       // prettier-ignore
       const result = await withTimeout(
@@ -31,7 +31,7 @@ export async function generateWithModelFallback<T>(
     } catch (err) {
       lastError = err;
 
-      if (isRetryableError(err)) {
+      if (isRetryableError(err) && index < models.length - 1) {
         const e = err as { status?: number };
         logger.warn(
           { model, status: e?.status ?? 'unknown', err },

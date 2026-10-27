@@ -1,11 +1,12 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { banUser, checkUserBanned, isBotAdmin, parseBanDuration } from '../../../core/ban/index.ts';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../../logging/context.ts';
 import { formatVNStoredDate, getVNTimeNow } from '../../../utils/date.ts';
 
 export async function handleBanUsebot(interaction: ChatInputCommandInteraction): Promise<void> {
   if (!isBotAdmin(interaction.user.id)) {
+    setCommandUsageRejection(interaction, 'permission-denied');
     await interaction.reply({
       content: 'Bạn không có quyền sử dụng lệnh này!',
       flags: MessageFlags.Ephemeral,
@@ -18,6 +19,7 @@ export async function handleBanUsebot(interaction: ChatInputCommandInteraction):
   const reason = interaction.options.getString('reason') ?? undefined;
 
   if (targetUser.id === interaction.client.user.id) {
+    setCommandUsageRejection(interaction, 'cannot-ban-bot');
     await interaction.reply({
       content: 'Không thể cấm chính bot!',
       flags: MessageFlags.Ephemeral,
@@ -26,6 +28,7 @@ export async function handleBanUsebot(interaction: ChatInputCommandInteraction):
   }
 
   if (isBotAdmin(targetUser.id)) {
+    setCommandUsageRejection(interaction, 'cannot-ban-admin');
     await interaction.reply({
       content: 'Không thể cấm Admin sử dụng bot!',
       flags: MessageFlags.Ephemeral,
@@ -35,6 +38,7 @@ export async function handleBanUsebot(interaction: ChatInputCommandInteraction):
 
   const duration = parseBanDuration(timeInput);
   if (!duration) {
+    setCommandUsageRejection(interaction, 'invalid-duration');
     await interaction.reply({
       content: 'Thời gian không hợp lệ!',
       flags: MessageFlags.Ephemeral,
@@ -106,13 +110,7 @@ export async function handleBanUsebot(interaction: ChatInputCommandInteraction):
       embeds: [embed],
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        targetUserId: targetUser.id,
-      },
-      'Lỗi khi thực hiện cấm người dùng',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.reply({
       content: 'Có lỗi xảy ra khi lưu thông tin cấm người dùng!',
       flags: MessageFlags.Ephemeral,

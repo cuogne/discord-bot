@@ -1,6 +1,6 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../../logging/context.ts';
 import { getUserConfig } from '../core/database/config.ts';
 
 export async function handleStatusSubcommand(
@@ -11,6 +11,7 @@ export async function handleStatusSubcommand(
   });
 
   if (!interaction.guild) {
+    setCommandUsageRejection(interaction, 'guild-required');
     await interaction.editReply({
       content: 'Lệnh này chỉ có thể sử dụng trong server!',
     });
@@ -75,12 +76,7 @@ export async function handleStatusSubcommand(
       embeds: [embed],
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-      },
-      'Error retrieving subscription status',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.editReply({
       content: 'Có lỗi xảy ra khi kiểm tra trạng thái cấu hình.',
     });

@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 import { getLatestNewsByCategory } from '../core/database/news.ts';
 import { CATEGORY_NAMES } from '../resources/links.ts';
 import type { NewsCategory } from '../types/types.ts';
@@ -46,12 +46,7 @@ export async function handleLatestSubcommand(
       content: lines.join('\n\n'),
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-      },
-      'Error executing /hcmus-news latest',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.editReply({
       content: 'Có lỗi xảy ra khi lấy tin tức. Vui lòng thử lại sau!',
     });

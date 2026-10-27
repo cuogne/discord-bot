@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../logging/context.ts';
 import { buildDictionaryEmbed } from './utils/embed.ts';
 import { fetchDictionary, WordNotFoundError } from './utils/fetch.ts';
 import { parseDictionary } from './utils/parse.ts';
@@ -35,13 +35,14 @@ const command: SlashCommand = {
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       if (error instanceof WordNotFoundError) {
+        setCommandUsageRejection(interaction, 'word-not-found');
         await interaction.editReply({
           content: error.message,
         });
         return;
       }
 
-      logger.error({ err: error, word: text }, 'Lỗi khi lấy từ điển');
+      setCommandUsageError(interaction, error);
       await interaction.editReply({
         content: 'Đã xảy ra lỗi khi tra từ điển.',
       });

@@ -1,4 +1,5 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { setCommandUsageError } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { fetchWithTimeout } from '../../utils/http.ts';
 
@@ -104,7 +105,8 @@ const command: SlashCommand = {
             .setImage('attachment://vietqr.png'),
         ],
       });
-    } catch {
+    } catch (error) {
+      setCommandUsageError(interaction, error);
       await interaction.editReply('Không tải được ảnh QR từ VietQR. Vui lòng thử lại sau.');
     }
   },

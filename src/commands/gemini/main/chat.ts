@@ -1,10 +1,13 @@
 import { MessageFlags } from 'discord.js';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { setCommandUsageError, setGeminiUsageLog } from '../../../logging/context.ts';
-import { logger } from '../../../logging/logger.ts';
-import { formatResponseTime } from '../../../utils/format.ts';
+import {
+  setCommandUsageDetails,
+  setCommandUsageError,
+  setCommandUsageRejection,
+  setGeminiUsageLog,
+} from '../../../logging/context.ts';
 import { handleUserCooldown } from '../../../utils/cooldown.ts';
-import { isGeminiConfigured } from '../../../core/gemini/config.ts';
+import { GeminiApiKeyError, isGeminiConfigured } from '../../../core/gemini/config.ts';
 import { getGeminiClient } from '../../../core/gemini/client.ts';
 import { generateContentStreamWithFallback } from './client.ts';
 import { getWebContext } from '../search/tavily.ts';
@@ -16,6 +19,7 @@ import { getGeminiErrorMessage } from '../utils/error.ts';
 
 export async function handleGemini(interaction: ChatInputCommandInteraction): Promise<void> {
   if (!isGeminiConfigured()) {
+    setCommandUsageError(interaction, new GeminiApiKeyError());
     await interaction.reply({
       content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này',
       flags: MessageFlags.Ephemeral,
@@ -24,6 +28,7 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
   }
 
   if (await handleUserCooldown(interaction, GEMINI_COOLDOWN_MS)) {
+    setCommandUsageRejection(interaction, 'cooldown');
     return;
   }
 
@@ -33,11 +38,13 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
   const selectedAttachment = interaction.options.getAttachment('attachment');
 
   const ai = getGeminiClient();
+  let startedAt: number | undefined;
+  let modelUsed: string | undefined;
 
   try {
     await interaction.deferReply();
 
-    const startedAt = Date.now(); // start to measure response time
+    startedAt = Date.now(); // start to measure response time
     const [attachment, tavily] = await Promise.all([
       selectedAttachment ? downloadGeminiAttachment(selectedAttachment) : undefined,
       getWebContext(prompt),
@@ -58,6 +65,7 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
       selectedModel,
       tavily,
     );
+    modelUsed = model;
 
     const replier = new StreamReplier(interaction);
     let tokensInput = 0;
@@ -75,6 +83,7 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
     }
 
     if (!replier.fullText.trim()) {
+      setCommandUsageError(interaction, new Error('Gemini returned an empty response'));
       await interaction.editReply({
         content: 'Không nhận được phản hồi từ Gemini. Vui lòng thử lại.',
       });
@@ -92,56 +101,23 @@ export async function handleGemini(interaction: ChatInputCommandInteraction): Pr
     await replier.finish();
 
     // end to measure response time
-    const responseTime = formatResponseTime(Date.now() - startedAt);
+    const responseTimeMs = Date.now() - startedAt;
     setGeminiUsageLog(interaction, {
-      responseTime,
+      model,
+      responseTimeMs,
       tokensInput,
       tokensOutput,
     });
-
-    // log of gemini
-    const channel = interaction.channel;
-    logger.info(
-      {
-        userId: interaction.user.id,
-        user: interaction.user.username,
-        guildId: interaction.guildId ?? 'DM',
-        channelId: interaction.channelId,
-        channel: channel && 'name' in channel ? channel.name : undefined,
-        options: {
-          prompt,
-          attachment: attachment
-            ? {
-                kind: attachment.kind,
-                name: attachment.name,
-                size: attachment.size,
-                contentType: attachment.mimeType,
-              }
-            : undefined,
-        },
-        model,
-        responseTime,
-        tokensInput,
-        tokensOutput,
-        tavily: tavily
-          ? {
-              resultCount: tavily.resultCount,
-              searchTimeSeconds: tavily.searchTimeSeconds,
-              sources: tavily.sources.length,
-            }
-          : undefined,
-      },
-      'gemini response',
-    );
   } catch (error) {
     setCommandUsageError(interaction, error);
-    logger.error(
-      {
-        err: error,
-        command: interaction.commandName,
-      },
-      'Gemini command error',
-    );
+    if (startedAt !== undefined) {
+      setCommandUsageDetails(interaction, {
+        geminiFailure: {
+          model: modelUsed,
+          responseTimeMs: Date.now() - startedAt,
+        },
+      });
+    }
 
     const message = getGeminiErrorMessage(error);
 

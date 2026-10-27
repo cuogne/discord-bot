@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import type { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageRejection } from '../../../logging/context.ts';
 import { getUserConfig, saveUserConfig } from '../core/database/config.ts';
 import {
   checkBotChannelPermissions,
@@ -25,6 +26,7 @@ export async function handleSetupSubcommand(
 
   // check if the command is used in a guild
   if (!interaction.inCachedGuild() || !interaction.guild) {
+    setCommandUsageRejection(interaction, 'guild-required');
     await interaction.editReply({
       content: 'Lệnh này chỉ có thể sử dụng trong server!',
     });
@@ -33,6 +35,7 @@ export async function handleSetupSubcommand(
 
   // check if the user has the required permissions (admin or manage channels)
   if (!isUserAdminOrManageChannels(interaction)) {
+    setCommandUsageRejection(interaction, 'permission-denied');
     await interaction.editReply({
       content:
         'Bạn cần có quyền **Manage Channels** hoặc **Administrator** trong server để thiết lập kênh nhận tin tức.',
@@ -44,6 +47,7 @@ export async function handleSetupSubcommand(
 
   // check if the selected channel is a text channel
   if (!isTextChannel(selectedChannel)) {
+    setCommandUsageRejection(interaction, 'invalid-channel-type');
     await interaction.editReply({
       content: 'Chỉ có thể thiết lập tin tức cho **Text Channel** trong server.',
     });
@@ -56,6 +60,7 @@ export async function handleSetupSubcommand(
 
   // check if the bot has the required permissions in the selected channel
   if (!hasPermissions) {
+    setCommandUsageRejection(interaction, 'bot-permission-denied');
     await interaction.editReply({
       content: `Bot thiếu các quyền sau trong kênh <#${textChannel.id}>: **${missing.join(', ')}**. Vui lòng cấp quyền cho bot trước khi thiết lập!`,
     });
@@ -66,6 +71,7 @@ export async function handleSetupSubcommand(
   const existingConfig = await getUserConfig(guildId);
 
   if (existingConfig && existingConfig.channelId === textChannel.id && existingConfig.isActive) {
+    setCommandUsageRejection(interaction, 'already-configured');
     await interaction.editReply({
       content: `Kênh <#${textChannel.id}> đã được thiết lập để nhận tin tức từ trước đó rồi!`,
     });
@@ -188,6 +194,13 @@ export async function handleSetupSubcommand(
       logger.error(
         {
           err,
+          command: 'hcmus-news',
+          subcommand: 'setup',
+          interactionId: i.id,
+          commandInteractionId: interaction.id,
+          userId: interaction.user.id,
+          guildId,
+          channelId: textChannel.id,
         },
         'Error processing setup confirmation',
       );
