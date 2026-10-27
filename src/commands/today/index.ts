@@ -1,10 +1,9 @@
 import { formatInTimeZone } from 'date-fns-tz';
 import { vi } from 'date-fns/locale/vi';
-import { SolarDate } from '@nghiavuive/lunar_date_vi';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
 import { VIETNAM_TIMEZONE } from '../../utils/date.ts';
-// check this lib calc lunar date: https://github.com/nacana22/lunar-date
+import { getVietnamLunarDate } from './utils/date.ts';
 
 const command: SlashCommand = {
   // prettier-ignore
@@ -23,7 +22,7 @@ const command: SlashCommand = {
       (character) => character.toUpperCase(),
     );
 
-    const lunar = new SolarDate(nowDate).toLunarDate();
+    const lunar = getVietnamLunarDate(nowDate);
     const lunarData = lunar.get();
     const leapSuffix = lunarData.leap_month ? ' (nhuận)' : '';
     const lunarDate = `${lunarData.day}/${lunarData.month}/${lunarData.year}${leapSuffix}`;
