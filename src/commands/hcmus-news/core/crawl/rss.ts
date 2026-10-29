@@ -7,6 +7,7 @@ import { normalizeUrl } from '../../utils/url.ts';
 interface RssParsedItem {
   title?: string[];
   link?: string[];
+  pubDate?: string[];
 }
 
 interface RssParsedChannel {
@@ -43,12 +44,15 @@ export async function crawlRssNews(url: string, category: NewsCategory): Promise
   for (const item of topItems) {
     const title = item.title?.[0]?.trim();
     const link = item.link?.[0]?.trim();
+    // These RSS sources already provide their publication time; do not add seven hours.
+    const publishedAt = item.pubDate?.[0] ? new Date(item.pubDate[0]) : null;
 
     if (title && link) {
       result.push({
         category,
         title,
         url: normalizeUrl(link),
+        ...(publishedAt && !Number.isNaN(publishedAt.getTime()) ? { publishedAt } : {}),
       });
     }
   }

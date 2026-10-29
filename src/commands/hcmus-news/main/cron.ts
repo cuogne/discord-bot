@@ -81,6 +81,7 @@ export async function processAndSendNews(client: Client): Promise<void> {
         url: item.url,
         summary,
         sentAt: getVNTimeNow(),
+        ...(item.publishedAt ? { publishedAt: item.publishedAt } : {}),
         prompt_token,
         completion_token,
       });

@@ -46,6 +46,7 @@ export async function saveNewsItems(items: ProcessedNewsItem[]): Promise<void> {
           title: item.title,
           summary: item.summary,
           sentAt: item.sentAt,
+          ...(item.publishedAt ? { publishedAt: item.publishedAt } : {}),
           prompt_token: item.prompt_token,
           completion_token: item.completion_token,
         },
@@ -62,7 +63,7 @@ export async function pruneOldNews(category: NewsCategory, keepCount = 20): Prom
   try {
     const docsToKeep = await model
       .find({ category }, { _id: 1 })
-      .sort({ sentAt: -1 })
+      .sort({ publishedAt: -1 })
       .limit(keepCount)
       .lean<{ _id: unknown }[]>();
 
@@ -93,7 +94,7 @@ export async function getLatestNewsByCategory(
     .find({
       category,
     })
-    .sort({ sentAt: -1 })
+    .sort({ publishedAt: -1 })
     .limit(limit)
     .lean<INewsConfig[]>();
 }

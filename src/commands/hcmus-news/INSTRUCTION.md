@@ -14,16 +14,6 @@
 | :------------------------------------------------------: | :----------------------------------------------------------: |
 | <img src="./resources/image/demo_pc.png" height="200" /> | <img src="./resources/image/demo_notice.png" height="200" /> |
 
-## Yêu cầu:
-
-Hiện tại mình có 2 phiên bản: Discord và Telegram
-
-- Discord: [Link bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849)
-
-- Telegram: [Link bot Telegram](https://t.me/hcmus_tintuc_bot)
-
-Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn.
-
 ## Command
 
 - `/hcmus-news latest <category> <number>`: trả về tin gần nhất dựa theo danh mục bạn chọn (số lượng từ 1 - 5).
@@ -40,12 +30,12 @@ Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn
 3. Tạo một server mới (nên tạo server riêng để nhận tin cho dễ quản lý và lấy quyền admin)
 
 <p align="center">
-  <img src="./resources/image/create_server.png" alt="Create Discord account" height="300" />
+  <img src="./resources/image/create_server.png" alt="Create Discord account" height="400" />
 </p>
 
-4. Thêm bot vào server của bạn bằng cách ấn vào link sau: [Bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849&permissions=0&integration_type=0&scope=bot+applications.commands)
+4. Thêm bot vào server của bạn bằng cách ấn vào link sau: [Bot Vô Diện](https://discord.com/oauth2/authorize?client_id=1395723998821879849)
 
-- Chọn `Add to Server`
+- Chọn `Add to Server` (không chọn `Add to My App`, vì bot cần vào được server của bạn mới gửi được).
 
 <p align="center">
   <img src="./resources/image/add_to_your_server.png" alt="Invite bot to server" height="400" />
@@ -56,7 +46,7 @@ Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn
 5. Vào lại server, click vào dấu cộng như hình để tạo một kênh mới, đặt tên tùy thích nhma nhớ chọn loại kênh là `Text` sau đó ấn `Create Channel`.
 
 <p align="center">
-  <img src="./resources/image/create_text_channel.png" alt="Create text channel" height="300" />
+  <img src="./resources/image/create_text_channel.png" alt="Create text channel" height="200" />
 </p>
 
 <p align="center">
@@ -68,25 +58,25 @@ Chức năng tương tự nhau, tùy vào bạn hay dùng cái nào để chọn
 > Nếu chưa thấy thì bạn nên quay lại bước 4 và mời lại bot vào server.
 
 <p align="center">
-  <img src="./resources/image/hcmus-news-setup.png" alt="Fit HCMUS News commands" />
+  <img src="./resources/image/hcmus-news-setup.png" alt="Fit HCMUS News commands" height="250" />
 </p>
 
 7. Chọn lệnh `/hcmus-news setup`, bạn sẽ thấy hiện ra 1 loạt channel như hình, bạn tìm tên của channel bạn đã tạo ở bước 5, chọn nó và nhấn Enter.
 
 <p align="center">
-  <img src="./resources/image/choose-a-channel.png" alt="Fit HCMUS News setup channel" />
+  <img src="./resources/image/choose-a-channel.png" alt="Fit HCMUS News setup channel" height="180" />
 </p>
 
 Nhấn `Xác nhận` để hoàn tất thiết lập.
 
 <p align="center">
-  <img src="./resources/image/confirm.png" alt="confirm" />
+  <img src="./resources/image/confirm.png" alt="confirm" height="300"/>
 </p>
 
 8. Bạn sẽ nhận 2 thông báo, 1 thông báo báo rằng bạn đã setup thành công và 1 thông báo nằm trong kênh bạn đã chọn báo rằng kênh này đã được thiết lập để nhận thông báo từ bot.
 
 <p align="center">
-  <img src="./resources/image/success.png" alt="Fit HCMUS News success setup"/>
+  <img src="./resources/image/success.png" alt="Fit HCMUS News success setup" height="300"/>
 </p>
 
 - Vậy là thành công, mỗi khi có tin mới từ các web của HCMUS, bot sẽ tự động gửi tin vào kênh bạn đã chọn như phần Demo ở trên, thời gian quét thông báo để gửi là 10 phút / lần.
@@ -94,16 +84,17 @@ Nhấn `Xác nhận` để hoàn tất thiết lập.
 - Nhớ bật `Notification` trong kênh đó là `All Messages` để không bỏ lỡ tin mới nhé.
 
 <p align="center">
-  <img src="./resources/image/all_message.png" alt="Fit HCMUS News notification setup"/>
+  <img src="./resources/image/all_message.png" alt="Fit HCMUS News notification setup" height="500"/>
+</p>
 
 - Nếu bạn không muốn nhận tin nữa, bạn chỉ cần vào kênh đó gõ lệnh `/hcmus-news remove`, xác nhận là xong, sẽ không còn thông báo nào gửi đến nữa.
 
 <p align="center">
-  <img src="./resources/image/remove.png" alt="Fit HCMUS News remove setup"/>
+  <img src="./resources/image/remove.png" alt="Fit HCMUS News remove setup" height="250"/>
 </p>
 
 <p align="center">
-  <img src="./resources/image/success_remove.png" alt="Fit HCMUS News success setup"/>
+  <img src="./resources/image/success_remove.png" alt="Fit HCMUS News success setup" height="200"/>
 </p>
 
 ### <samp> Setup thành công rồi thì xin một star cho repo này nhé :3</samp>

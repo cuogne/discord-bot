@@ -15,6 +15,7 @@ export interface RawNewsItem {
   readonly category: NewsCategory;
   readonly title: string;
   readonly url: string;
+  readonly publishedAt?: Date;
   readonly content?: string;
 }
 
@@ -24,6 +25,7 @@ export interface ProcessedNewsItem {
   readonly url: string;
   readonly summary: string;
   readonly sentAt: Date;
+  readonly publishedAt?: Date;
   readonly prompt_token?: number;
   readonly completion_token?: number;
 }
@@ -44,7 +46,8 @@ export interface INewsConfig {
   url: string;
   title: string;
   summary: string;
-  sentAt: Date;
+  sentAt?: Date;
+  publishedAt?: Date;
   prompt_token?: number;
   completion_token?: number;
 }
