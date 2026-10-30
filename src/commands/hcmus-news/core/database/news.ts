@@ -63,7 +63,7 @@ export async function pruneOldNews(category: NewsCategory, keepCount = 20): Prom
   try {
     const docsToKeep = await model
       .find({ category }, { _id: 1 })
-      .sort({ publishedAt: -1 })
+      .sort({ sentAt: -1 })
       .limit(keepCount)
       .lean<{ _id: unknown }[]>();
 
@@ -94,7 +94,7 @@ export async function getLatestNewsByCategory(
     .find({
       category,
     })
-    .sort({ publishedAt: -1 })
+    .sort({ sentAt: -1 })
     .limit(limit)
     .lean<INewsConfig[]>();
 }
