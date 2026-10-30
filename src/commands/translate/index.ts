@@ -1,8 +1,8 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { handleUserCooldown } from '../../utils/cooldown.ts';
-import { DeepLRequestError, DeepLResponseError, translateText } from './api/client.ts';
+import { DeepLRequestError, translateText } from './api/client.ts';
 import { DeepLConfigError, getDeepLConfig } from './api/config.ts';
 import { buildTranslationPresentation } from './utils/embed.ts';
 
@@ -44,6 +44,7 @@ const command: SlashCommand = {
     const targetLanguage = interaction.options.getString('to', true);
 
     if (!original) {
+      setCommandUsageRejection(interaction, 'empty-text');
       // prettier-ignore
       await interaction.reply({
         content: 'Bạn cần nhập nội dung để dịch.',
@@ -57,6 +58,7 @@ const command: SlashCommand = {
       config = getDeepLConfig();
     } catch (error) {
       if (error instanceof DeepLConfigError) {
+        setCommandUsageError(interaction, error);
         // prettier-ignore
         await interaction.reply({
           content: 'Bot chưa cấu hình DeepL API. Vui lòng báo cho quản trị viên.',
@@ -68,6 +70,7 @@ const command: SlashCommand = {
     }
 
     if (await handleUserCooldown(interaction, TRANSLATE_COOLDOWN_MS)) {
+      setCommandUsageRejection(interaction, 'cooldown');
       return;
     }
 
@@ -87,14 +90,7 @@ const command: SlashCommand = {
       });
     } catch (error) {
       if (error instanceof DeepLRequestError) {
-        logger.warn(
-          {
-            status: error.status,
-            userId: interaction.user.id,
-            command: 'translate',
-          },
-          'DeepL translation request failed',
-        );
+        setCommandUsageError(interaction, error);
 
         const message =
           error.status === 429
@@ -112,17 +108,7 @@ const command: SlashCommand = {
         return;
       }
 
-      // prettier-ignore
-      logger.error(
-        {
-          err: error,
-          userId: interaction.user.id,
-          command: 'translate',
-        },
-        error instanceof DeepLResponseError
-          ? 'DeepL returned an invalid response'
-          : 'Failed to translate text',
-      );
+      setCommandUsageError(interaction, error);
       // prettier-ignore
       await interaction.editReply({
         content: 'Không thể dịch nội dung lúc này. Vui lòng thử lại sau.',

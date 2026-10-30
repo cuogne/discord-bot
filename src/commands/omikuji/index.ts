@@ -2,11 +2,17 @@ import { AttachmentBuilder, EmbedBuilder, MessageFlags, SlashCommandBuilder } fr
 import * as fs from 'fs';
 import * as path from 'path';
 import { getGeminiClient } from '../../core/gemini/client.ts';
-import { GeminiConfigError, isGeminiConfigured } from '../../core/gemini/config.ts';
+import {
+  GeminiApiKeyError,
+  GeminiConfigError,
+  isGeminiConfigured,
+} from '../../core/gemini/config.ts';
 import type { SlashCommand } from '../../types/command.ts';
-import { formatResponseTime } from '../../utils/format.ts';
-import { logger } from '../../logging/logger.ts';
-import { setGeminiUsageLog } from '../../logging/context.ts';
+import {
+  setCommandUsageDetails,
+  setCommandUsageError,
+  setGeminiUsageLog,
+} from '../../logging/context.ts';
 import type { OmikujiGenerationResult } from './utils/client.ts';
 import { generateOmikujiMessage } from './utils/client.ts';
 import {
@@ -24,6 +30,7 @@ const command: SlashCommand = {
 
   async execute(interaction) {
     if (!isGeminiConfigured()) {
+      setCommandUsageError(interaction, new GeminiApiKeyError());
       await interaction.reply({
         content: 'Chưa cấu hình Gemini API key, không thể sử dụng lệnh này',
         flags: MessageFlags.Ephemeral,
@@ -37,6 +44,7 @@ const command: SlashCommand = {
     const topicIdx = Math.floor(Math.random() * TOPICS.length);
     const omikujiName = OMIKUJI_RESULTS[resultIdx]!;
     const topic = TOPICS[topicIdx]!;
+    setCommandUsageDetails(interaction, { omikuji: { result: omikujiName, topic } });
 
     const assetsDir = path.join(import.meta.dir, 'assets');
     const imageName = fs
@@ -54,14 +62,7 @@ const command: SlashCommand = {
     try {
       result = await generateOmikujiMessage(ai, buildOmikujiPrompt(omikujiName, topic));
     } catch (err) {
-      logger.error(
-        {
-          err,
-          omikuji: omikujiName,
-          topic,
-        },
-        'Omikuji command error',
-      );
+      setCommandUsageError(interaction, err);
       const message =
         err instanceof GeminiConfigError
           ? 'Chưa cấu hình GEMINI_MODELS, không thể sử dụng lệnh này.'
@@ -78,31 +79,18 @@ const command: SlashCommand = {
     }
 
     if (!result.text.trim()) {
+      setCommandUsageError(interaction, new Error('Gemini returned an empty omikuji response'));
       await interaction.editReply('Không nhận được lời quẻ. Vui lòng thử lại.');
       return;
     }
 
-    const responseTime = formatResponseTime(Date.now() - startedAt);
+    const responseTimeMs = Date.now() - startedAt;
     setGeminiUsageLog(interaction, {
-      responseTime,
+      model: result.model,
+      responseTimeMs,
       tokensInput: result.tokensInput,
       tokensOutput: result.tokensOutput,
     });
-
-    logger.info(
-      {
-        userId: interaction.user.id,
-        user: interaction.user.username,
-        guildId: interaction.guildId ?? 'DM',
-        omikuji: omikujiName,
-        topic,
-        model: result.model,
-        responseTime,
-        tokensInput: result.tokensInput,
-        tokensOutput: result.tokensOutput,
-      },
-      'omikuji response',
-    );
 
     const embed = new EmbedBuilder()
       .setColor(OMIKUJI_EMBED_COLOR)

@@ -3,7 +3,10 @@ import type { CommandUsageLog, GeminiUsageLog, StudocuTimingLog } from '../types
 
 const commandUsageDetails = new WeakMap<ChatInputCommandInteraction, GeminiUsageLog>();
 const studocuTimingDetails = new WeakMap<ChatInputCommandInteraction, StudocuTimingLog>();
-const commandUsageErrors = new WeakMap<ChatInputCommandInteraction, string>();
+const commandUsageErrors = new WeakMap<ChatInputCommandInteraction, unknown>();
+const commandReplyErrors = new WeakMap<ChatInputCommandInteraction, unknown>();
+const commandUsageRejections = new WeakMap<ChatInputCommandInteraction, string>();
+const commandUsageMetadata = new WeakMap<ChatInputCommandInteraction, Record<string, unknown>>();
 
 export function setGeminiUsageLog(
   interaction: ChatInputCommandInteraction,
@@ -23,20 +26,51 @@ export function setCommandUsageError(
   interaction: ChatInputCommandInteraction,
   error: unknown,
 ): void {
-  const message = error instanceof Error ? error.message : String(error);
-  commandUsageErrors.set(interaction, message);
+  if (!commandUsageErrors.has(interaction)) {
+    commandUsageErrors.set(interaction, error);
+  } else {
+    commandReplyErrors.set(interaction, error);
+  }
 }
 
-export function createCommandUsageContext(
+export function setCommandReplyError(
   interaction: ChatInputCommandInteraction,
-): CommandUsageLog {
+  error: unknown,
+): void {
+  commandReplyErrors.set(interaction, error);
+}
+
+export function setCommandUsageRejection(
+  interaction: ChatInputCommandInteraction,
+  reason: string,
+): void {
+  commandUsageRejections.set(interaction, reason);
+}
+
+export function setCommandUsageDetails(
+  interaction: ChatInputCommandInteraction,
+  details: Record<string, unknown>,
+): void {
+  commandUsageMetadata.set(interaction, {
+    ...commandUsageMetadata.get(interaction),
+    ...details,
+  });
+}
+
+export async function createCommandUsageContext(
+  interaction: ChatInputCommandInteraction,
+): Promise<CommandUsageLog> {
   const isDirectMessage = interaction.guildId === null;
-  const channelName =
-    interaction.channel && 'name' in interaction.channel
-      ? (interaction.channel.name ?? (isDirectMessage ? 'DM' : 'No access'))
-      : isDirectMessage
-        ? 'DM'
-        : 'No access';
+  const guild =
+    interaction.guild ??
+    (interaction.guildId
+      ? await interaction.client.guilds.fetch(interaction.guildId).catch(() => null)
+      : null);
+  const channel =
+    interaction.channel ??
+    interaction.client.channels.cache.get(interaction.channelId) ??
+    (await interaction.client.channels.fetch(interaction.channelId).catch(() => null));
+  const channelName = channel && 'name' in channel ? channel.name : undefined;
 
   const options = Object.fromEntries(
     interaction.options.data.flatMap((opt) =>
@@ -47,16 +81,26 @@ export function createCommandUsageContext(
   ) as Record<string, unknown>;
 
   return {
+    outcome: commandUsageErrors.has(interaction)
+      ? 'failed'
+      : commandUsageRejections.has(interaction)
+        ? 'rejected'
+        : 'completed',
     userId: interaction.user.id,
+    interactionId: interaction.id,
     user: interaction.user.username,
     command: interaction.commandName,
+    subcommand: interaction.options.getSubcommand(false) ?? undefined,
     options,
     guildId: interaction.guildId ?? 'DM',
-    guild: interaction.guild?.name ?? (isDirectMessage ? 'DM' : 'No access'),
+    guild: guild?.name ?? (isDirectMessage ? 'DM' : 'No access'),
     channelId: interaction.channelId,
-    channel: channelName,
+    channel: channelName ?? (isDirectMessage ? 'DM' : 'No access'),
     gemini: commandUsageDetails.get(interaction),
     studocu: studocuTimingDetails.get(interaction),
-    error: commandUsageErrors.get(interaction),
+    details: commandUsageMetadata.get(interaction),
+    err: commandUsageErrors.get(interaction),
+    replyErr: commandReplyErrors.get(interaction),
+    reason: commandUsageRejections.get(interaction),
   };
 }

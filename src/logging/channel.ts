@@ -36,8 +36,20 @@ export async function sendCommandUsageLog(
       .join('\n');
 
     const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
-      .setTitle('Command log')
+      .setColor(
+        logData.outcome === 'failed'
+          ? 0xed4245
+          : logData.outcome === 'rejected'
+            ? 0xfee75c
+            : 0x5865f2,
+      )
+      .setTitle(
+        logData.outcome === 'failed'
+          ? 'Command failed'
+          : logData.outcome === 'rejected'
+            ? 'Command rejected'
+            : 'Command log',
+      )
       .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
       .setDescription(`${interaction.user} vừa sử dụng command: **${commandLabel}**\n`)
       .addFields(
@@ -62,6 +74,11 @@ export async function sendCommandUsageLog(
           inline: false,
         },
         {
+          name: 'Status',
+          value: logData.outcome,
+          inline: true,
+        },
+        {
           name: 'Duration',
           value: logData.durationMs !== undefined ? `${logData.durationMs} ms` : 'Không rõ',
           inline: true,
@@ -77,7 +94,8 @@ export async function sendCommandUsageLog(
       embed.addFields({
         name: 'Gemini Usage',
         value: [
-          `⏱️ Response time: **${logData.gemini.responseTime}**`,
+          `🤖 Model: **${logData.gemini.model}**`,
+          `⏱️ Response time: **${logData.gemini.responseTimeMs} ms**`,
           `📥 Input tokens: **${logData.gemini.tokensInput}**`,
           `📤 Output tokens: **${logData.gemini.tokensOutput}**`,
         ].join('\n'),
@@ -97,14 +115,6 @@ export async function sendCommandUsageLog(
           `Đóng phiên, gửi file: **${(timing.deliveryMs / 1_000).toFixed(1)} giây**`,
           `Toàn bộ command: **${((logData.durationMs ?? 0) / 1_000).toFixed(1)} giây**`,
         ].join('\n'),
-        inline: false,
-      });
-    }
-
-    if (logData.error) {
-      embed.addFields({
-        name: 'Error',
-        value: truncate(logData.error),
         inline: false,
       });
     }

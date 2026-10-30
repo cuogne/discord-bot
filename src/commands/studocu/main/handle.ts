@@ -1,6 +1,10 @@
 import { AttachmentBuilder, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
-import { setCommandUsageError, setStudocuTimingLog } from '../../../logging/context.ts';
-import { logger } from '../../../logging/logger.ts';
+import {
+  setCommandUsageError,
+  setCommandUsageRejection,
+  setCommandUsageDetails,
+  setStudocuTimingLog,
+} from '../../../logging/context.ts';
 import { sanitizeBrowserlessError } from '../api/browserless.ts';
 import { downloadStudocu } from './download.ts';
 import { StudocuDownloadError } from '../types/types.ts';
@@ -13,10 +17,9 @@ import { createStudocuProgressReporter } from '../utils/progress.ts';
 import { getStudocuDocumentId, parseStudocuDocumentUrl } from '../utils/url.ts';
 
 export async function handleStudocu(interaction: ChatInputCommandInteraction): Promise<void> {
-  const commandStartedAt = Date.now();
   const url = parseStudocuDocumentUrl(interaction.options.getString('link', true));
   if (!url) {
-    setCommandUsageError(interaction, 'invalid-url');
+    setCommandUsageRejection(interaction, 'invalid-url');
     // prettier-ignore
     await interaction.reply({
       content: 'Link không hợp lệ. Hãy dán link trang tài liệu Studocu.',
@@ -24,6 +27,8 @@ export async function handleStudocu(interaction: ChatInputCommandInteraction): P
     });
     return;
   }
+
+  setCommandUsageDetails(interaction, { documentId: getStudocuDocumentId(url) });
 
   await interaction.deferReply();
   const progress = createStudocuProgressReporter(interaction);
@@ -59,7 +64,7 @@ export async function handleStudocu(interaction: ChatInputCommandInteraction): P
     const downloadFinishedAt = Date.now();
     await progress.finish();
     if (pdf.length > interaction.attachmentSizeLimit) {
-      setCommandUsageError(interaction, 'attachment-too-large');
+      setCommandUsageRejection(interaction, 'attachment-too-large');
       // prettier-ignore
       await interaction.editReply({
         content: formatStudocuStatus(title, '⚠️ Tài liệu quá lớn để gửi qua Discord ở kênh này.'),
@@ -89,33 +94,9 @@ export async function handleStudocu(interaction: ChatInputCommandInteraction): P
       pdfBytes: pdf.length,
     };
     setStudocuTimingLog(interaction, timingLog);
-    // prettier-ignore
-    logger.info(
-      {
-        command: 'studocu',
-        documentId,
-        userId: interaction.user.id,
-        ...timingLog,
-        totalMs: Date.now() - commandStartedAt,
-      },
-      'Studocu download completed',
-    );
   } catch (error) {
+    setCommandUsageError(interaction, sanitizeBrowserlessError(error));
     await progress.finish();
-    setCommandUsageError(
-      interaction,
-      error instanceof StudocuDownloadError ? error.reason : 'download-failed',
-    );
-    // prettier-ignore
-    logger.error(
-      {
-        err: sanitizeBrowserlessError(error),
-        command: interaction.commandName,
-        userId: interaction.user.id,
-        documentId: getStudocuDocumentId(url),
-      },
-      'Studocu download failed',
-    );
 
     const message =
       error instanceof StudocuDownloadError && error.reason === 'unavailable'

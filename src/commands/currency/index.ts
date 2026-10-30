@@ -1,5 +1,5 @@
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { formatCurrencyDisplay, getExchangeRate } from './utils.ts';
 
@@ -73,6 +73,7 @@ const command: SlashCommand = {
       amount <= 0 ||
       amount > 1_000_000_000
     ) {
+      setCommandUsageRejection(interaction, 'invalid-currency-input');
       // prettier-ignore
       await interaction.reply({
         content: 'Số tiền hoặc loại tiền không hợp lệ.',
@@ -97,17 +98,7 @@ const command: SlashCommand = {
         embeds: [embed],
       });
     } catch (error) {
-      // prettier-ignore
-      logger.error(
-        {
-          err: error,
-          userId: interaction.user.id,
-          command: 'currency',
-          from,
-          to,
-        },
-        'Currency conversion failed',
-      );
+      setCommandUsageError(interaction, error);
 
       // prettier-ignore
       await interaction.editReply({

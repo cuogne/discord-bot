@@ -13,14 +13,14 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
     type: 'rss',
   },
   {
-    url: 'https://www.ctda.hcmus.edu.vn/wp-json/wp/v2/posts?per_page=10&_fields=title,link',
+    url: 'https://www.ctda.hcmus.edu.vn/wp-json/wp/v2/posts?per_page=10&_fields=title,link,date_gmt',
     sourceLink: 'https://www.ctda.hcmus.edu.vn/vi/thong-bao/',
     name: 'Chương trình Đề án CNTT (CLC/APCS) - CTĐA@HCMUS',
     category: 'ctda',
     type: 'json',
   },
   {
-    url: 'https://hcmus.edu.vn/wp-json/wp/v2/posts?categories=3&per_page=10&_fields=title,link',
+    url: 'https://hcmus.edu.vn/wp-json/wp/v2/posts?categories=3&per_page=10&_fields=title,link,date_gmt',
     sourceLink: 'https://hcmus.edu.vn/category/dao-tao/dai-hoc/thong-tin-danh-cho-sinh-vien',
     name: 'Thông tin dành cho Sinh viên - HCMUS',
     category: 'hcmus',
@@ -48,7 +48,7 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
     type: 'rss',
   },
   {
-    url: 'https://hcmus.edu.vn/wp-json/wp/v2/posts?categories=1&per_page=10&_fields=title,link',
+    url: 'https://hcmus.edu.vn/wp-json/wp/v2/posts?categories=1&per_page=10&_fields=title,link,date_gmt',
     sourceLink: 'https://hcmus.edu.vn/category/tin-tuc/',
     name: 'Tin tức chung - HCMUS',
     category: 'tintuc',

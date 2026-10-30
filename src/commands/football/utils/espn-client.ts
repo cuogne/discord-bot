@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { logger } from '../../../logging/logger.ts';
 import {
   getHttpRetryDelay,
   HTTP_MAX_RETRIES,
@@ -41,14 +40,6 @@ export async function espnFetch<T>(url: string): Promise<T> {
             ? error.response.data
             : JSON.stringify(error.response.data);
 
-        logger.error(
-          {
-            url,
-            status,
-            body: body.slice(0, 2000),
-          },
-          'ESPN API error',
-        );
         throw new EspnApiError(`ESPN API lỗi với status ${status}`, url, status, body);
       }
 

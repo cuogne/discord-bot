@@ -22,6 +22,7 @@ export const newsConfigSchema = new Schema<INewsConfig>(
     url: { type: String, required: true, unique: true },
     title: { type: String, default: '' },
     summary: { type: String, default: '' },
+    publishedAt: { type: Date, index: true },
     sentAt: { type: Date, default: getVNTimeNow, index: true },
     prompt_token: { type: Number, default: 0 },
     completion_token: { type: Number, default: 0 },
@@ -30,3 +31,4 @@ export const newsConfigSchema = new Schema<INewsConfig>(
 );
 
 newsConfigSchema.index({ category: 1, sentAt: -1 });
+newsConfigSchema.index({ category: 1, publishedAt: -1 });

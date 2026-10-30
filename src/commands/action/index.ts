@@ -1,7 +1,7 @@
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import type { ChatInputCommandInteraction, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError, setCommandUsageRejection } from '../../logging/context.ts';
 import { ACTIONS } from './utils/config.ts';
 import { fetchActionImage } from './utils/nekos.ts';
 
@@ -31,6 +31,7 @@ const command: SlashCommand = {
     const actionText = ACTIONS[action];
 
     if (!actionText) {
+      setCommandUsageRejection(interaction, 'unsupported-action');
       await interaction.reply({
         content: 'Hành động này chưa được hỗ trợ.',
         flags: MessageFlags.Ephemeral,
@@ -54,15 +55,7 @@ const command: SlashCommand = {
         embeds: [embed],
       });
     } catch (error) {
-      logger.error(
-        {
-          action,
-          user: interaction.user.tag,
-          target: targetUser.tag,
-          err: error,
-        },
-        '[Action Command Error]',
-      );
+      setCommandUsageError(interaction, error);
 
       const message = `Không lấy được gif ${actionText} rồi, thử lại sau nha.`;
       if (interaction.replied || interaction.deferred) {

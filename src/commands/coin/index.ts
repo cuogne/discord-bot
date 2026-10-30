@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
+import { setCommandUsageRejection } from '../../logging/context.ts';
 import { handleUserCooldown } from '../../utils/cooldown.ts';
 import { COIN_COOLDOWN_MS, MAX_COIN } from './config.ts';
 import { handleCoinBauCua } from './subcommands/baucua/index.ts';
@@ -129,6 +130,7 @@ const command: SlashCommand = {
       // Read-only lookup: never consume the game cooldown.
       if (subcommand !== 'cash' && subcommand !== 'info') {
         if (await handleUserCooldown(interaction, COIN_COOLDOWN_MS)) {
+          setCommandUsageRejection(interaction, 'cooldown');
           return;
         }
       }

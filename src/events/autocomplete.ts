@@ -19,6 +19,10 @@ export async function executeAutocomplete(interaction: AutocompleteInteraction) 
     logger.error(
       {
         err: error,
+        interactionId: interaction.id,
+        userId: interaction.user.id,
+        guildId: interaction.guildId ?? 'DM',
+        channelId: interaction.channelId,
         command: interaction.commandName,
       },
       'Error in autocomplete',

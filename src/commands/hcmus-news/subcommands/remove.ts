@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import type { ChatInputCommandInteraction, TextChannel } from 'discord.js';
 import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageRejection } from '../../../logging/context.ts';
 import { deleteUserConfig, getUserConfig } from '../core/database/config.ts';
 import { isUserAdminOrManageChannels } from '../utils/permissions.ts';
 
@@ -20,6 +21,7 @@ export async function handleRemoveSubcommand(
   });
 
   if (!interaction.inCachedGuild() || !interaction.guild) {
+    setCommandUsageRejection(interaction, 'guild-required');
     await interaction.editReply({
       content: 'Lệnh này chỉ có thể sử dụng trong server!',
     });
@@ -27,6 +29,7 @@ export async function handleRemoveSubcommand(
   }
 
   if (!isUserAdminOrManageChannels(interaction)) {
+    setCommandUsageRejection(interaction, 'permission-denied');
     await interaction.editReply({
       content:
         'Bạn cần có quyền **Manage Channels** hoặc **Administrator** trong server để hủy nhận tin tức.',
@@ -38,6 +41,7 @@ export async function handleRemoveSubcommand(
   const config = await getUserConfig(guildId);
 
   if (!config || !config.isActive) {
+    setCommandUsageRejection(interaction, 'not-configured');
     await interaction.editReply({
       content: 'Server này hiện chưa thiết lập kênh nhận tin tức nào để xóa.',
     });
@@ -132,6 +136,13 @@ export async function handleRemoveSubcommand(
       logger.error(
         {
           err,
+          command: 'hcmus-news',
+          subcommand: 'remove',
+          interactionId: i.id,
+          commandInteractionId: interaction.id,
+          userId: interaction.user.id,
+          guildId,
+          channelId: config.channelId,
         },
         'Error processing news subscription removal',
       );

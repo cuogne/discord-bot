@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import type { SlashCommand } from '../../types/command.ts';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError } from '../../logging/context.ts';
 import { fetchWithTimeout } from '../../utils/http.ts';
 import type { GasPriceRow } from './types/types.ts';
 import { getToday } from './utils/date.ts';
@@ -30,7 +30,7 @@ const command: SlashCommand = {
 
       rows = Array.isArray(dataRaw[0]) ? dataRaw[0] : dataRaw;
     } catch (error) {
-      logger.error({ err: error, date: today }, 'Lỗi khi lấy giá xăng');
+      setCommandUsageError(interaction, error);
       await interaction.editReply('Không có dữ liệu giá xăng cho ngày hôm nay.');
       return;
     }

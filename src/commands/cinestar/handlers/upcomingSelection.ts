@@ -37,6 +37,10 @@ export async function handleUpcomingMovieSelection(
     logger.error(
       {
         err: error,
+        interactionId: interaction.id,
+        userId: interaction.user.id,
+        guildId: interaction.guildId ?? 'DM',
+        channelId: interaction.channelId,
         movieIndex,
       },
       'Lỗi khi chọn phim sắp chiếu Cinestar',

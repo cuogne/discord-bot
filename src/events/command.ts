@@ -4,9 +4,13 @@ import { commandMap } from '../commands/index.ts';
 import { checkUserBanned } from '../core/ban/index.ts';
 import type { IBanRecord } from '../core/ban/types.ts';
 import { sendCommandUsageLog } from '../logging/channel.ts';
-import { createCommandUsageContext, setCommandUsageError } from '../logging/context.ts';
+import {
+  createCommandUsageContext,
+  setCommandReplyError,
+  setCommandUsageError,
+  setCommandUsageRejection,
+} from '../logging/context.ts';
 import { logCommandUsage } from '../logging/console.ts';
-import { logger } from '../logging/logger.ts';
 import { formatVNStoredDate } from '../utils/date.ts';
 
 async function replyBannedMessage(interaction: ChatInputCommandInteraction, banRecord: IBanRecord) {
@@ -24,45 +28,28 @@ async function replyBannedMessage(interaction: ChatInputCommandInteraction, banR
 
 export async function executeCommand(interaction: ChatInputCommandInteraction) {
   const command = commandMap.get(interaction.commandName);
-  const subcommand = interaction.options.getSubcommand(false);
-  const commandContext = {
-    command: interaction.commandName,
-    ...(subcommand ? { subcommand } : {}),
-    userId: interaction.user.id,
-    guildId: interaction.guildId ?? 'DM',
-    channelId: interaction.channelId,
-  };
   const startedAt = Date.now();
 
-  if (!command) {
-    await interaction.reply({
-      content: 'Command does not exist!',
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
-  // check if user is banned
-  const banRecord = checkUserBanned(interaction.user.id);
-  if (banRecord) {
-    logger.warn(commandContext, 'Blocked command from banned user');
-    await replyBannedMessage(interaction, banRecord);
-    return;
-  }
-
-  // Execute the command for the user
   try {
+    if (!command) {
+      setCommandUsageRejection(interaction, 'unknown-command');
+      await interaction.reply({
+        content: 'Command does not exist!',
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    const banRecord = checkUserBanned(interaction.user.id);
+    if (banRecord) {
+      setCommandUsageRejection(interaction, 'banned-user');
+      await replyBannedMessage(interaction, banRecord);
+      return;
+    }
+
     await command.execute(interaction);
   } catch (error) {
     setCommandUsageError(interaction, error);
-    logger.error(
-      {
-        err: error,
-        ...commandContext,
-        durationMs: Date.now() - startedAt,
-      },
-      'Error executing command',
-    );
     try {
       if (interaction.deferred || interaction.replied) {
         await interaction.followUp({
@@ -76,17 +63,12 @@ export async function executeCommand(interaction: ChatInputCommandInteraction) {
         });
       }
     } catch (replyError) {
-      logger.error(
-        {
-          err: replyError,
-          ...commandContext,
-        },
-        'Error sending error message',
-      );
+      setCommandReplyError(interaction, replyError);
     }
   } finally {
-    const context = createCommandUsageContext(interaction);
-    context.durationMs = Date.now() - startedAt;
+    const durationMs = Date.now() - startedAt;
+    const context = await createCommandUsageContext(interaction);
+    context.durationMs = durationMs;
     logCommandUsage(context);
     void sendCommandUsageLog(interaction, context);
   }

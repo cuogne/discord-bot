@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 import { fetchComingMovies } from '../api/client.ts';
 import { buildUpcomingMovieSelect } from '../utils/components.ts';
 import { formatDayVN } from '../utils/date.ts';
@@ -25,12 +25,7 @@ export async function handleUpcoming(interaction: ChatInputCommandInteraction): 
       components: [buildUpcomingMovieSelect(options)],
     });
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-      },
-      'Lỗi khi lấy lịch phim sắp chiếu Cinestar',
-    );
+    setCommandUsageError(interaction, error);
     await interaction.editReply('Có lỗi khi lấy lịch phim sắp chiếu tại Cinestar.');
   }
 }

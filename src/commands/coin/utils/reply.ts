@@ -1,4 +1,5 @@
 import { EmbedBuilder, type ChatInputCommandInteraction } from 'discord.js';
+import { setCommandUsageRejection } from '../../../logging/context.ts';
 import { getCoinUser } from '../database/users.ts';
 import { formatCoins } from './format.ts';
 
@@ -6,6 +7,7 @@ export async function replyInsufficientBalance(
   interaction: ChatInputCommandInteraction,
   coin: number,
 ): Promise<void> {
+  setCommandUsageRejection(interaction, 'insufficient-balance');
   const user = await getCoinUser(interaction.user.id);
   await interaction.editReply({
     embeds: [

@@ -19,10 +19,16 @@ export function describeBrowserlessError(error: unknown): string {
     .replaceAll(encodeURIComponent(apiKey), '[REDACTED]');
 }
 
-export function sanitizeBrowserlessError(error: unknown): Error {
+export function sanitizeBrowserlessError(error: unknown, depth = 0): Error {
   const safe = new Error(describeBrowserlessError(error));
   if (error instanceof Error) {
     safe.name = error.name;
+    if ('reason' in error && typeof error.reason === 'string') {
+      Object.assign(safe, { reason: error.reason });
+    }
+    if ('cause' in error && error.cause && depth < 4) {
+      Object.assign(safe, { cause: sanitizeBrowserlessError(error.cause, depth + 1) });
+    }
     const apiKey = process.env.BROWSERLESS_API_KEY?.trim();
     if (error.stack && apiKey) {
       safe.stack = error.stack

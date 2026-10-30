@@ -56,7 +56,10 @@ export async function handleHelpSelection(interaction: StringSelectMenuInteracti
     logger.error(
       {
         err: error,
+        interactionId: interaction.id,
         userId: interaction.user.id,
+        guildId: interaction.guildId ?? 'DM',
+        channelId: interaction.channelId,
         customId: interaction.customId,
       },
       'Failed to handle help category selection',

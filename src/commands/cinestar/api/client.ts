@@ -51,16 +51,7 @@ async function fetchMovieData(
     `https://cinestar.com.vn/api/showTime/?${params.toString()}`,
   );
   if (!response.ok) {
-    logger.warn(
-      {
-        movieId: id,
-        cinema: cinema.name,
-        date: day,
-        status: response.status,
-      },
-      'Cinestar showtime request failed',
-    );
-    return [];
+    throw new Error(`Cinestar showtime request for movie ${id} returned HTTP ${response.status}`);
   }
 
   const data = (await response.json()) as ShowtimesResponse;
@@ -113,21 +104,30 @@ export async function fetchTodayMovies(cinema: Cinema, date: string): Promise<Ca
     movieIds.map(async (id) => {
       try {
         const movies = await fetchMovieData(id, cinema, day);
-        return movies.flatMap((movie) => toCachedMovies(movie, date, cinema));
+        return { movies: movies.flatMap((movie) => toCachedMovies(movie, date, cinema)) };
       } catch (error) {
-        logger.warn(
-          {
-            err: error,
-            movieId: id,
-            cinema: cinema.name,
-            date,
-          },
-          'Failed to fetch Cinestar movie showtimes',
-        );
-        return [];
+        return {
+          error: new Error(`Cinestar movie ${id} showtimes failed for ${cinema.name} on ${date}`, {
+            cause: error,
+          }),
+        };
       }
     }),
   );
 
-  return results.flat();
+  const failures = results.flatMap((result) => (result.error ? [result.error] : []));
+  const successfulRequests = results.filter((result) => result.movies !== undefined).length;
+
+  if (successfulRequests === 0 && failures.length > 0) {
+    throw new AggregateError(
+      failures,
+      `All Cinestar showtime requests failed for ${cinema.name} on ${date}`,
+    );
+  }
+
+  for (const failure of failures) {
+    logger.warn({ err: failure }, 'Failed to fetch Cinestar movie showtimes');
+  }
+
+  return results.flatMap((result) => result.movies ?? []);
 }

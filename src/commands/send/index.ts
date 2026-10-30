@@ -1,5 +1,5 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { logger } from '../../logging/logger.ts';
+import { setCommandUsageError } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 
 const command: SlashCommand = {
@@ -21,14 +21,7 @@ const command: SlashCommand = {
     try {
       await interaction.reply({ content: message });
     } catch (error) {
-      logger.error(
-        {
-          err: error,
-          channelId: interaction.channelId,
-          userId: interaction.user.id,
-        },
-        'Lỗi khi gửi tin nhắn bằng send command',
-      );
+      setCommandUsageError(interaction, error);
 
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({

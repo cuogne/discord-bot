@@ -11,7 +11,7 @@ import {
   toEspnDate,
 } from '../utils/format.ts';
 import { getVietnamDateParts } from '../../../utils/date.ts';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 
 export async function handleFootballToday(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -102,12 +102,7 @@ export async function handleFootballToday(interaction: ChatInputCommandInteracti
       embeds: [embeds],
     });
   } catch (err) {
-    logger.error(
-      {
-        err,
-      },
-      'Lỗi khi lấy lịch thi đấu hôm nay',
-    );
+    setCommandUsageError(interaction, err);
     await interaction.editReply('Có lỗi xảy ra khi lấy lịch thi đấu hôm nay.');
   }
 }

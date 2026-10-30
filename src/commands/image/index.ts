@@ -1,4 +1,5 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { setCommandUsageRejection } from '../../logging/context.ts';
 import type { SlashCommand } from '../../types/command.ts';
 import { handleImage } from './main/image.ts';
 import { IMAGE_SOURCES } from './utils/config.ts';
@@ -24,6 +25,7 @@ const command: SlashCommand = {
     const source = IMAGE_SOURCES[subcommand];
 
     if (!source) {
+      setCommandUsageRejection(interaction, 'invalid-subcommand');
       await interaction.reply({
         content: 'Subcommand không hợp lệ.',
         flags: MessageFlags.Ephemeral,

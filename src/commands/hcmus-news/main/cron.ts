@@ -54,7 +54,7 @@ export async function processAndSendNews(client: Client): Promise<void> {
 
       if (!SKIP_SUMMARY_CATEGORIES.has(item.category)) {
         try {
-          const content = await extractArticleContent(item.url);
+          const content = item.content || (await extractArticleContent(item.url));
           if (content) {
             // summarize the article content using Gemini API
             const summaryRes = await summarizeNewsWithGemini(content, item.title);
@@ -81,6 +81,7 @@ export async function processAndSendNews(client: Client): Promise<void> {
         url: item.url,
         summary,
         sentAt: getVNTimeNow(),
+        ...(item.publishedAt ? { publishedAt: item.publishedAt } : {}),
         prompt_token,
         completion_token,
       });

@@ -46,6 +46,7 @@ export async function saveNewsItems(items: ProcessedNewsItem[]): Promise<void> {
           title: item.title,
           summary: item.summary,
           sentAt: item.sentAt,
+          ...(item.publishedAt ? { publishedAt: item.publishedAt } : {}),
           prompt_token: item.prompt_token,
           completion_token: item.completion_token,
         },

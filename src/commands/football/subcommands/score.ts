@@ -3,7 +3,7 @@ import { EmbedBuilder } from 'discord.js';
 import { TOURNAMENTS } from '../data/tournaments.ts';
 import { fetchScoreboardsForDates, getCompetitor } from '../utils/espn.ts';
 import { FOOTBALL_EMBED_COLOR, addDays, formatMatchScore, toEspnDate } from '../utils/format.ts';
-import { logger } from '../../../logging/logger.ts';
+import { setCommandUsageError } from '../../../logging/context.ts';
 
 export async function handleFootballScore(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -87,7 +87,7 @@ export async function handleFootballScore(interaction: ChatInputCommandInteracti
       embeds: [embeds],
     });
   } catch (err) {
-    logger.error({ err }, 'Lỗi khi lấy tỉ số bóng đá');
+    setCommandUsageError(interaction, err);
     await interaction.editReply('Có lỗi xảy ra khi lấy tỉ số bóng đá.');
   }
 }

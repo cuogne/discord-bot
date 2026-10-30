@@ -1,4 +1,3 @@
-import { logger } from '../../../logging/logger.ts';
 import { fetchWithTimeout } from '../../../utils/http.ts';
 
 const NEKOS_API = 'https://nekos.best/api/v2';
@@ -9,6 +8,18 @@ interface NekosResponse {
   }[];
 }
 
+class NekosApiError extends Error {
+  constructor(
+    message: string,
+    readonly url: string,
+    readonly status?: number,
+    readonly responseBody?: string,
+  ) {
+    super(message);
+    this.name = 'NekosApiError';
+  }
+}
+
 export async function fetchActionImage(action: string): Promise<string> {
   const url = `${NEKOS_API}/${action}?amount=1`;
 
@@ -17,33 +28,25 @@ export async function fetchActionImage(action: string): Promise<string> {
   });
 
   if (!response.ok) {
-    const body = await response.text();
-    logger.error(
-      {
-        url,
-        status: response.status,
-        statusText: response.statusText,
-        contentType: response.headers.get('content-type'),
-        body,
-      },
-      '[Nekos.best] Request failed',
+    const responseBody = (await response.text()).slice(0, 2000);
+    throw new NekosApiError(
+      `Nekos.best responded with HTTP ${response.status}`,
+      url,
+      response.status,
+      responseBody,
     );
-    throw new Error(`Nekos.best responded with status ${response.status}`);
   }
 
   const data = (await response.json()) as NekosResponse;
   const actionImage = data.results?.[0]?.url;
 
   if (!actionImage) {
-    logger.error(
-      {
-        url,
-        data,
-      },
-      '[Nekos.best] Invalid response',
+    throw new NekosApiError(
+      `Nekos.best returned no ${action} image`,
+      url,
+      response.status,
+      JSON.stringify(data).slice(0, 2000),
     );
-
-    throw new Error(`No ${action} image returned from Nekos.best`);
   }
 
   return actionImage;
