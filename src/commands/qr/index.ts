@@ -29,19 +29,15 @@ const command: SlashCommand = {
           { name: 'HDBank', value: 'HDB' },
           { name: 'VIB', value: 'VIB' },
           { name: 'SHB', value: 'SHB' },
-          { name: 'Eximbank', value: 'EIB' },
-          { name: 'MSB', value: 'MSB' },
           { name: 'OCB', value: 'OCB' },
-          { name: 'PVcomBank', value: 'PVCB' },
-          { name: 'SeABank', value: 'SEAB' },
           { name: 'LPBank', value: 'LPB' },
-          { name: 'NCB', value: 'NCB' },
-          { name: 'Timo', value: 'TIMO' }
+          { name: 'Timo', value: 'TIMO' },
+          { name: 'Shinhan Bank', value: 'SHBVN' },
         ),
     )
     .addStringOption((option) =>
       option
-        .setName('account')
+        .setName('account.no')
         .setDescription('Số tài khoản ngân hàng')
         .setRequired(true),
     )
@@ -60,50 +56,80 @@ const command: SlashCommand = {
     )
     .addStringOption((option) =>
       option
-        .setName('accountname')
+        .setName('account.name')
         .setDescription('Tên chủ tài khoản hiển thị trên ảnh QR'),
     ),
 
   async execute(interaction) {
     const bank = interaction.options.getString('bank', true);
-    const account = interaction.options.getString('account', true).trim();
+    const account = interaction.options.getString('account.no', true).trim();
     const amount = interaction.options.getInteger('amount');
     const description = interaction.options.getString('description')?.trim();
-    const accountName = interaction.options.getString('accountname')?.trim();
+    const accountName = interaction.options.getString('account.name')?.trim();
 
     const user = interaction.user;
 
-    const qrUrl = new URL(
-      `https://img.vietqr.io/image/${encodeURIComponent(bank)}-${encodeURIComponent(account)}-print.png`,
+    // vietqr.app renders a ready-to-send PNG card (QR + info).
+    const amountParam = amount !== null ? `&amount=${amount}` : '';
+    const desParam = description ? `&des=${encodeURIComponent(description)}` : '';
+    const holderParam = accountName ? `&holder=${encodeURIComponent(accountName)}` : '';
+    const qrAppUrl = new URL(
+      `https://vietqr.app/img?acc=${encodeURIComponent(account)}&bank=${encodeURIComponent(bank)}${amountParam}${desParam}${holderParam}&template=compact&showinfo=true&fullacc=true`,
     );
-    if (amount !== null) {
-      qrUrl.searchParams.set('amount', String(amount));
-    }
-    if (description) {
-      qrUrl.searchParams.set('addInfo', description);
-    }
-    if (accountName) {
-      qrUrl.searchParams.set('accountName', accountName);
-    }
 
     await interaction.deferReply();
 
     try {
-      const response = await fetchWithTimeout(qrUrl);
-      if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) {
-        throw new Error(`VietQR returned HTTP ${response.status}`);
+      const response = await fetchWithTimeout(qrAppUrl);
+      const contentType = response.headers.get('content-type') ?? '';
+      if (!response.ok || !contentType.startsWith('image/') || contentType.includes('svg')) {
+        throw new Error(`vietqr.app returned HTTP ${response.status} (${contentType})`);
       }
-
       const image = Buffer.from(await response.arrayBuffer());
-      const attachment = new AttachmentBuilder(image, { name: 'vietqr.png' });
+      const isPng =
+        image.length > 2048 &&
+        image[0] === 0x89 &&
+        image[1] === 0x50 &&
+        image[2] === 0x4e &&
+        image[3] === 0x47;
+      if (!isPng) {
+        throw new Error('vietqr.app did not return a valid PNG');
+      }
+      const attachment = new AttachmentBuilder(image, {
+        name: 'vietqr.png',
+      });
+
+      const embed = new EmbedBuilder()
+        .setDescription(`### Mã QR chuyển khoản của ${user}`)
+        .addFields(
+          { name: 'Ngân hàng', value: bank, inline: true },
+          { name: 'Số tài khoản', value: account, inline: true },
+        )
+        .setImage('attachment://vietqr.png');
+
+      if (amount !== null) {
+        embed.addFields({
+          name: 'Số tiền',
+          value: `${amount.toLocaleString('vi-VN')} VND`,
+          inline: true,
+        });
+      }
+      if (description) {
+        embed.addFields({
+          name: 'Nội dung',
+          value: description,
+        });
+      }
+      if (accountName) {
+        embed.addFields({
+          name: 'Chủ tài khoản',
+          value: accountName,
+        });
+      }
 
       await interaction.editReply({
         files: [attachment],
-        embeds: [
-          new EmbedBuilder()
-            .setDescription(`### Mã QR chuyển khoản của ${user}`)
-            .setImage('attachment://vietqr.png'),
-        ],
+        embeds: [embed],
       });
     } catch (error) {
       setCommandUsageError(interaction, error);

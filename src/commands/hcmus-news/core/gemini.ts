@@ -2,10 +2,11 @@ import { getGeminiSummaryClient } from '../../../core/gemini/client.ts';
 import { isGeminiSummaryConfigured } from '../../../core/gemini/config.ts';
 import { generateWithModelFallback } from '../../../core/gemini/fallback.ts';
 import { logger } from '../../../logging/logger.ts';
-import { buildSummarizePrompt } from '../utils/prompt.ts';
+import { buildSummarizeSystemInstruction } from '../utils/prompt.ts';
 
 export interface SummarizeResult {
   summary: string;
+  model?: string;
   prompt_token: number;
   completion_token: number;
 }
@@ -30,15 +31,21 @@ export async function summarizeNewsWithGemini(
   //   };
   // }
 
-  const prompt = buildSummarizePrompt(content.trim());
+  let attemptedModel: string | undefined;
 
   try {
     const ai = getGeminiSummaryClient();
 
-    const { result } = await generateWithModelFallback(async (modelId) => {
+    const { result, model } = await generateWithModelFallback(async (modelId) => {
+      attemptedModel = modelId;
       return ai.models.generateContent({
         model: modelId,
-        contents: prompt,
+        contents: content.trim(),
+        config: {
+          systemInstruction: buildSummarizeSystemInstruction(),
+          temperature: 0.5,
+          responseMimeType: 'text/plain',
+        },
       });
     });
 
@@ -50,6 +57,7 @@ export async function summarizeNewsWithGemini(
 
     return {
       summary,
+      model,
       prompt_token: prompt_token ?? 0,
       completion_token: completion_token ?? 0,
     };
@@ -57,12 +65,14 @@ export async function summarizeNewsWithGemini(
     logger.error(
       {
         err,
+        model: attemptedModel,
         ...(title ? { title } : {}),
       },
       'Failed to summarize news with Gemini',
     );
     return {
       summary: '',
+      model: attemptedModel,
       prompt_token: 0,
       completion_token: 0,
     };

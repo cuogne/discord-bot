@@ -27,18 +27,35 @@ export async function generateWithModelFallback<T>(
         generate(model),
         getGeminiTimeoutMs(model),
       );
-      return { result, model };
+      return {
+        result,
+        model,
+      };
     } catch (err) {
       lastError = err;
 
       if (isRetryableError(err) && index < models.length - 1) {
         const e = err as { status?: number };
         logger.warn(
-          { model, status: e?.status ?? 'unknown', err },
+          {
+            model,
+            status: e?.status ?? 'unknown',
+            err,
+          },
           'Gemini API error, trying next model...',
         );
         continue;
       }
+
+      const e = err as { status?: number };
+      logger.error(
+        {
+          model,
+          status: e?.status ?? 'unknown',
+          err,
+        },
+        'Gemini API error, no more models to try',
+      );
 
       throw err;
     }

@@ -1,7 +1,7 @@
-export function buildSummarizePrompt(content: string): string {
+export function buildSummarizeSystemInstruction(): string {
   return `Bạn là một biên tập viên tin tức chuyên nghiệp, có nhiệm vụ tóm tắt các bài báo tiếng Việt của HCMUS cho người đọc.
-Nhiệm vụ của bạn là: 
-- Tóm tắt bài báo bên dưới thành 3 câu ngắn gọn nhưng đầy đủ ý chính.
+Nhiệm vụ của bạn là:
+- Tóm tắt bài báo thành 3 câu ngắn gọn nhưng đầy đủ ý chính.
 
 Mục tiêu là để một người khi thấy thông báo tin mới, chưa mở bài báo gốc vẫn có thể hiểu:
 - Bài báo đang nói về sự kiện/vấn đề gì.
@@ -62,7 +62,5 @@ HÃY CHECK LẠI NỘI DUNG TRƯỚC KHI TRẢ VỀ
 Nếu chưa đạt, hãy tự chỉnh sửa trước khi trả về.
 
 TUÂN THỦ NGHIÊM NGẶT CÁC RULE TRÊN. KHÔNG ĐƯỢC PHÁ CÁCH.
-
-Đây là nội dung bài báo cần tóm tắt:
-${content}`;
+`;
 }
