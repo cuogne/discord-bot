@@ -37,7 +37,7 @@ const command: SlashCommand = {
     )
     .addStringOption((option) =>
       option
-        .setName('account.no')
+        .setName('account_no')
         .setDescription('Số tài khoản ngân hàng')
         .setRequired(true),
     )
@@ -56,16 +56,16 @@ const command: SlashCommand = {
     )
     .addStringOption((option) =>
       option
-        .setName('account.name')
+        .setName('account_name')
         .setDescription('Tên chủ tài khoản hiển thị trên ảnh QR'),
     ),
 
   async execute(interaction) {
     const bank = interaction.options.getString('bank', true);
-    const account = interaction.options.getString('account.no', true).trim();
+    const account = interaction.options.getString('account_no', true).trim();
     const amount = interaction.options.getInteger('amount');
     const description = interaction.options.getString('description')?.trim();
-    const accountName = interaction.options.getString('account.name')?.trim();
+    const accountName = interaction.options.getString('account_name')?.trim();
 
     const user = interaction.user;
 
